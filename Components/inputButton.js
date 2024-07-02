@@ -21,13 +21,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#e87848',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 9,
+    paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 15,
     marginTop: '3%'
   },
   text: {
-    fontSize: 16,
+    fontSize: 19,
     color: 'white',
     fontWeight: 'bold',
     lineHeight: 21,

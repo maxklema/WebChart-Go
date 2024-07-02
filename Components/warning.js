@@ -17,14 +17,17 @@ const styles = StyleSheet.create({
         backgroundColor: '#b56969',
         paddingHorizontal: 10,
         paddingVertical: 5,
-        borderRadius: 20,
+        borderRadius: 10,
         marginBottom: '3%',
-        display: 'none'
+        display: 'none',
+        width: '75%',
     },
+
     warning: {
         color: 'white',
         fontWeight: '600',
         fontSize: 15,
+        textAlign: 'center'
     }
 
 });
