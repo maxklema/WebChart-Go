@@ -46,6 +46,10 @@ const Credentials = ({ navigation }) => {
             .then(() => {
                 console.log(mie.Cookie.value);
                 setWarningMessage('Successful Login', true);
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: `Main` }],
+                  });
             })
         } catch (err) {
             setWarningMessage('Invalid Credentials', false);
@@ -63,7 +67,7 @@ const Credentials = ({ navigation }) => {
                         source={require('./../../assets/wc-logo.jpg')}
                         style={styles.wc_logo}
                     /> 
-                    <Text style={styles.welcomeMessage}>WebChart Go</Text>
+                    <Text style={styles.welcomeMessage}>{mie.practice.value}</Text>
                     <Text style={styles.welcomeInstructions}>Enter your WebChart Credentials</Text>
                 </View>
                 <View style={styles.fields}>
