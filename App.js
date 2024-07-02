@@ -4,40 +4,53 @@ import {
   Text, 
   View,
   SafeAreaView, 
-  TextInput,
   Pressable,
   Image
 } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
+import InputBox from './Components/inputBox';
+import InputButton from './Components/inputButton';
+import Warning from './Components/warning';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default function App() {
 
-  mie.Cookie.value = "1b1279e8-2fd2-4e6d-9a38-1694d91901cd";
+  
   mie.URL.value = "https://mieinternprac.webchartnow.com/webchart.cgi";
-  mie.practice.value = "mieinternprac";
-  mie.username.value = "maxklema";
-  mie.password.value = "Minecraftguy!910";
+  
+  const [text, onChangeText] = useState('');
+  const [isError, setIsError] = useState(true);
+  const [warning, setWarning ] = useState('Invalid WebChart URL');
+  const [showWarning, setShowWarning] = useState(false);
 
-  // mie.getCookie()
-  // .then(() => {
-  //   console.log(mie.Cookie.value);
-  // })
-
-  const [URL, onChangeURL] = useState('');
-  const [isError, setIsError] = useState(false);
-
-  function validateURL(){
-    fetch(URL)
+  const validateURL = (text) => {
+    setShowWarning(true)
+    fetch(text)
     .then(response => {
       if (response.status == 200){
-        setIsError(true)
-      } else if (response.status == 401)
-        setIsError(false)
+        setIsError(true);
+        setWarning('Invalid WebChart URL');
+      } else if (response.status == 401) {
+        setIsError(false);
+        setWarning('Valid WebChart URL');
+      }
     })
-    .catch(err => {
-      console.log(err);
+    .catch(() => {
+      setIsError(true);
+      setWarning('Invalid WebChart URL');
     });
+    onChangeText(text);
+  };
+
+  function navigateToLogin(){
+    if (isError){
+      console.log("Invalid URL");
+      setIsError(true);
+      setWarning('Invalid WebChart URL');
+    } else {
+      mie.URL.value = text;
+      
+    }
   }
 
   return (
@@ -51,18 +64,18 @@ export default function App() {
           <Text style={styles.welcomeInstructions}>Enter your WebChart URL To get Started</Text>
         </View>
         <View style={styles.fields}>
-          <TextInput
-            style={[styles.input, isError && styles.inputError]}
-            value={ URL }
-            onChangeText={ onChangeURL }
-            placeholder='Webchart URL'
-            keyboardType="url" // This sets the keyboard type to optimize for URLs
-            autoCapitalize="none" // Prevents auto-capitalization
-            autoCorrect={false}
+          <InputBox
+            style={ isError && styles.inputError }
+            placeholder="WebChart URL"
+            text={ text }
+            onChangeText={ validateURL }
           />
-          <Pressable style={styles.button} onPress={() => validateURL()}>
-            <Text style={styles.text}>Continue</Text>
-          </Pressable>
+          <Warning text={ warning } style={ [!isError && styles.validURL, (showWarning && isError ) && styles.invalidURL ] }/>
+          <InputButton 
+            text="Continue"
+            style={ isError && styles.nullifyButton }
+            onPress={ () => navigateToLogin() }
+          />
         </View>
 
     </SafeAreaView>
@@ -98,37 +111,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  button: {
-    backgroundColor: '#e87848',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 25,
-    borderRadius: 15,
-    marginTop: '3%'
-  },
-  text: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold',
-    lineHeight: 21,
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  input: {
-    height: 40,
-    width: '75%',
-    margin: 12,
-    borderWidth: 1,
-    borderColor: 'black',
-    padding: 10,
-    borderRadius: 10
-  },
   inputError: {
     borderColor: 'red'
+  },
+  validURL: {
+    backgroundColor: '#69b57a',
+    display: 'flex'
+  },
+  invalidURL: {
+    display: 'flex'
+  },
+  nullifyButton: {
+    opacity: '0.4'
   }
+ 
 });
