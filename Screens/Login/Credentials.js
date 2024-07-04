@@ -31,6 +31,14 @@ const Credentials = ({ navigation }) => {
         setButtonText('Login');
     }
 
+    // async function getPatID(){ 
+    //   let JSON_data;
+    //   console.log(mie.practice.value);
+    //   JSON_data = await mie.retrieveRecord("patients", [], { pat_id: 18});
+    //   console.log(JSON.stringify(JSON_data));
+    //   //mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+    // }
+
     async function validateLogin() {
         setButtonText('Loading');
         if (username.length == 0 || password.length == 0){
@@ -47,9 +55,9 @@ const Credentials = ({ navigation }) => {
                 console.log(mie.Cookie.value);
                 setWarningMessage('Successful Login', true);
                 navigation.reset({
-                    index: 0,
-                    routes: [{ name: `Main` }],
-                  });
+                  index: 0,
+                  routes: [{ name: `Main` }],
+                });
             })
         } catch (err) {
             setWarningMessage('Invalid Credentials', false);

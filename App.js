@@ -1,12 +1,14 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import UrlScreen from './Screens/Login/url';
-import Credentials from './Screens/Login/Credentials';
-import Dashboard from './Screens/Home/Dashboard';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import UrlScreen from './Screens/Login/url';
+import Credentials from './Screens/Login/Credentials';
+import Dashboard from './Screens/Home/Dashboard';
+import Profile from './Screens/Home/Profile';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -52,7 +54,7 @@ const Tab = createBottomTabNavigator();
             />
             <Tab.Screen
                 name="You"
-                component={Dashboard}
+                component={Profile}
             />
         </Tab.Navigator>
     );
