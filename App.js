@@ -9,6 +9,7 @@ import UrlScreen from './Screens/Login/url';
 import Credentials from './Screens/Login/Credentials';
 import Dashboard from './Screens/Home/Dashboard';
 import Profile from './Screens/Home/Profile';
+import WebViewScreen from './Screens/Login/WebViewSSO';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -69,6 +70,7 @@ const Tab = createBottomTabNavigator();
           <Stack.Navigator initialRouteName="Enter URL">
               <Stack.Screen name="Enter URL" component={UrlScreen} />
               <Stack.Screen name="Enter Credentials" component={Credentials} />
+              <Stack.Screen name="WebView" component={WebViewScreen} />
               <Stack.Screen name="Main" component={NavBar} options={{ headerShown: false}}/>
           </Stack.Navigator>
         </NavigationContainer>

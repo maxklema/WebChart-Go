@@ -67,7 +67,7 @@ const UrlScreen = ({ navigation }) => {
             setWarning('Invalid WebChart URL');
         } else {
             parseURL();
-            navigation.navigate('Enter Credentials')
+            navigation.navigate('WebView')
         }
     }
 

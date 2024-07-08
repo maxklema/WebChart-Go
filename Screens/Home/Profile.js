@@ -93,6 +93,8 @@ const Profile = ({navigation}) => {
         
         let JSON_data;
         JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: mie.username.value });
+        console.log("COokie: " + mie.Cookie.value);
+        console.log("Pat_ID " + mie.User_PatID.value);
         mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
 
     }
