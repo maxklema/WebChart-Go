@@ -7,7 +7,7 @@ const DataTable = ({ style, data, ...props}) => {
   return (
     <View styles={[styles.container, style]} {...props}>
       {data.map((item, index) => (
-        <TableRow indexMain={index} dataLength={data.length} data={item} />
+        <TableRow key={index} indexMain={index} dataLength={data.length} data={item} />
       ))}
     </View>
   );

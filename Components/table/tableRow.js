@@ -9,7 +9,9 @@ const TableRow = ({ data, dataLength, indexMain }) => {
         (indexMain != 0 && indexMain != dataLength - 1) && styles.row,
         ]}>
       {data.map((cell, index) => (
-        <Text key={index} style={styles.text}>{cell.length != 0 ? cell : "--"}</Text>
+        <View key={index} style={index === 0 ? styles.key : styles.value}>
+          <Text style={index === 0 ? styles.key_text : styles.value_text}>{cell.length != 0 ? cell : "--"}</Text>
+        </View>
       ))}
     </View>
   );
@@ -24,6 +26,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: '5%',
     paddingVertical: '3%',
+    alignItems: 'center'
   },
   firstRow: {
     flexDirection: 'row',
@@ -35,6 +38,7 @@ const styles = StyleSheet.create({
     paddingVertical: '3%',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    alignItems: 'center'
   },
   lastRow: {
     flexDirection: 'row',
@@ -46,11 +50,23 @@ const styles = StyleSheet.create({
     paddingVertical: '3%',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    alignItems: 'center'
   },
-  text: {
+  key_text: {
     color: 'black',
     fontSize: '17px',
-    
+  },
+  value_text: {
+    color: 'rgb(125,125,125)',
+    fontSize: '17px'
+  },
+  value: {
+    display: 'flex',
+    maxWidth: '60%',
+  },
+  key: {
+    display: 'flex',
+    maxWidth: '50%',
   }
 });
 
