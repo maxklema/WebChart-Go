@@ -9,7 +9,7 @@ import UrlScreen from './Screens/Login/url';
 import Credentials from './Screens/Login/Credentials';
 import Dashboard from './Screens/Home/Dashboard';
 import Profile from './Screens/Home/Profile';
-import WebViewScreen from './Screens/Login/WebViewSSO';
+import WebViewScreen from './Screens/Login/WebViewSSO.native';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
