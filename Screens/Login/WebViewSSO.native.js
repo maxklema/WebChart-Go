@@ -4,29 +4,43 @@ import { WebView } from "react-native-webview";
 import mie from '@maxklema/mie-api-tools';
 
 const WebViewScreen = () => {
+    
 
     const webViewRef = useRef(null);
 
+    const getCookie = (navState) => {
+        const { url } = navState;
 
-    const getCookie = () => {
-        
-        //inject JS
-        webViewRef.current.injectJavaScript(`
-            (function() {
-                //let cookie = document.cookie;
-                //cookie = cookie.slice(-36);
-                fetch('${mie.URL.value}')
-                .then(response => {   
-                    window.ReactNativeWebView.postMessage(response.headers.get('x-lg_session_id'));
-                })
-            })();    
-        `);
+        if (url.endsWith('webchart.cgi?func=omniscope')) {
+            
+            //inject Javascript into landing page
+            webViewRef.current.injectJavaScript(`
+                (function() {
+                    
+                    fetch('${mie.URL.value}')
+                    .then(response => {
+                        let dataToReturn = {'Cookie': response.headers.get('x-lg_session_id'), 'Username': response.headers.get('X-lg_username')};
+                        window.ReactNativeWebView.postMessage(JSON.stringify(dataToReturn));
+                    })
+                })();    
+            `);
+
+        }
 
     }
 
-    const onMessage = (event) => {
-        const cookie = event.nativeEvent.data;
-        mie.Cookie.value = cookie;
+    const onMessage = async (event) => {
+        
+        const data = JSON.parse(event.nativeEvent.data);
+        mie.Cookie.value = data.Cookie;
+
+        //get Patient ID
+        let JSON_data;
+        JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
+        mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+    
+        console.log('----------------------');
+        console.log(mie.User_PatID.value);
         console.log(mie.Cookie.value);
     }
 

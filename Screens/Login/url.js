@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   StyleSheet, 
   Text, 
@@ -20,6 +22,44 @@ const UrlScreen = ({ navigation }) => {
     const [isError, setIsError] = useState(true);
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
+
+
+
+    useFocusEffect(
+      React.useCallback( () => {
+          console.log('URL screen focused');
+
+          async function myFunc() {
+            const User_Systems = await getURL('wc-system-urls');
+            if (!User_Systems){
+              let system_array = []
+              await storeURL('wc-system-urls', 'Yes');
+            }
+          }
+
+          myFunc(); 
+          
+
+      }, [])
+    );
+
+    const storeURL = async(key, value) => {
+      try {
+        await AsyncStorage.setItem(key, value);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const getURL = async(key) => {
+      try {
+        const value = await AsyncStorage.setItem(key);
+        if (value)
+          return value;
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     const config = {
         method: 'GET',
@@ -61,13 +101,20 @@ const UrlScreen = ({ navigation }) => {
         console.log(mie.URL.value);
     }
 
-    function navigateToLogin(){
+    async function navigateToLogin(){
         if (isError){
             setIsError(true);
             setWarning('Invalid WebChart URL');
         } else {
+            const User_Systems = await getURL('wc-system-urls');
+            console.log(User_Systems);
+            if (User_Systems.contains(mie.URL.value)){
+              User_Systems.append(mie.URL.value);
+              await storeURL('wc-system-urls', User_Systems);
+            }
+
             parseURL();
-            navigation.navigate('WebView')
+            navigation.navigate('WebView');
         }
     }
 
