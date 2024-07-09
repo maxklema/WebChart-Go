@@ -50,6 +50,7 @@ const Credentials = ({ navigation }) => {
         mie.username.value = username;
         mie.password.value = password;
         try {
+          console.log(mie.URL.value);
            await mie.getCookie()
             .then(() => {
                 console.log(mie.Cookie.value);
@@ -60,6 +61,7 @@ const Credentials = ({ navigation }) => {
                 });
             })
         } catch (err) {
+            console.error(err);
             setWarningMessage('Invalid Credentials', false);
         }
 

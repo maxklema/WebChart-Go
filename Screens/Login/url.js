@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   StyleSheet, 
   Text, 
@@ -12,14 +14,43 @@ import mie from '@maxklema/mie-api-tools';
 import InputBox from './../../Components/inputBox';
 import InputButton from './../../Components/inputButton';
 import Warning from './../../Components/warning';
+import { Button } from 'react-native-paper';
 
 const UrlScreen = ({ navigation }) => {
-   
+
     const [text, onChangeText] = useState('');
     const [onLoad, setOnload] = useState(true);
     const [isError, setIsError] = useState(true);
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
+    const [storedSystems, setStoredSystems] = useState([]);
+
+
+    useFocusEffect(
+      React.useCallback( () => {
+
+          async function setSystemsCookie() {
+          
+            const user_systems = await AsyncStorage.getItem('wc-system-urls');
+            // await AsyncStorage.removeItem('wc-system-urls');
+            if (!user_systems){
+              let WC_Systems = {
+                name: "WC_Systems",
+                system_URLS: []
+              };
+              setStoredSystems[WC_Systems.system_URLS];
+              await AsyncStorage.setItem("wc-system-urls", JSON.stringify(WC_Systems));
+            } else {
+              const parsed_us = JSON.parse(user_systems);
+              setStoredSystems(parsed_us.system_URLS);
+            }
+            
+          }
+
+          setSystemsCookie(); 
+          
+      }, [])
+    );
 
     const config = {
         method: 'GET',
@@ -55,19 +86,37 @@ const UrlScreen = ({ navigation }) => {
         onChangeText(text);
     };
 
-    function parseURL(){
-        mie.practice.value = text.substring(8, text.indexOf('.'));
-        mie.URL.value = text.substring(0,text.indexOf(".com")+4) + '/webchart.cgi';
-        console.log(mie.URL.value);
+    function parseURL(URL){
+        URL != '' ? mie.practice.value = URL.substring(8, text.indexOf('.')) : mie.practice.value = text.substring(8, text.indexOf('.'));
+        URL == '' ? mie.URL.value = text.substring(0,text.indexOf(".com")+4) + '/webchart.cgi' : mie.URL.value = URL;
     }
 
-    function navigateToLogin(){
+    async function navigateToLogin(URL){
         if (isError){
             setIsError(true);
             setWarning('Invalid WebChart URL');
         } else {
-            parseURL();
-            navigation.navigate('Enter Credentials')
+
+            parseURL(URL);
+
+            const user_Systems = JSON.parse(await AsyncStorage.getItem('wc-system-urls'));
+            const user_Systems_URLS = user_Systems.system_URLS;
+
+            //check if URL is already stored
+            if (!user_Systems_URLS.includes(mie.URL.value)) {
+              user_Systems_URLS.unshift(mie.URL.value);
+              user_Systems.system_URLS = user_Systems_URLS;
+              await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+            } else { 
+              //set URL to the front of the list
+              user_Systems_URLS.pop(mie.URL.value);
+              user_Systems_URLS.unshift(mie.URL.value);
+              user_Systems.system_URLS = user_Systems_URLS;
+              await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+            }
+            
+
+            navigation.navigate('WebView');
         }
     }
 
@@ -95,9 +144,21 @@ const UrlScreen = ({ navigation }) => {
             <InputButton 
                 text="Continue"
                 style={ isError && styles.nullifyButton }
-                onPress={ () => navigateToLogin() }
+                onPress={ () => navigateToLogin('') }
             />
             </View>
+            { storedSystems.length > 0 ?
+            <View style={ styles.Container_RecentSystems }>
+                <Text style={styles.welcomeInstructions}>Recent Systems</Text>
+                { storedSystems.slice(0,3)?.map((URL, index) => (
+                  <Button onPress={() => navigateToLogin(URL)} key={index} style={ styles.recent_URL_Button} >
+                    <Text style={ styles.Button_Text }>{URL}</Text>
+                  </Button>
+                ))}
+            </View>
+              : <View></View>
+            }
+        
         
         </SafeAreaView>
     </KeyboardAvoidingView>
@@ -108,6 +169,13 @@ const UrlScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   kbContainer: {
     flex: 1,
+  },
+  Container_RecentSystems: {
+    marginTop: '10%',
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
+
   },
   fields: {
     width: '100%',
@@ -153,6 +221,17 @@ const styles = StyleSheet.create({
   },
   nullifyButton: {
     opacity: '0.4'
+  },
+  recent_URL_Button: {
+    marginTop: '3%',
+    backgroundColor: 'rgb(250,250,250)',
+    width: '75%',
+    alignSelf: 'center'
+  },
+  Button_Text: {
+    color: 'rgb(50,50,50)',
+    textAlign: 'center',
+    fontSize: '14',
   }
  
 });
