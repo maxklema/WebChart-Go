@@ -32,7 +32,8 @@ const UrlScreen = ({ navigation }) => {
           async function setSystemsCookie() {
           
             const user_systems = await AsyncStorage.getItem('wc-system-urls');
-            // await AsyncStorage.removeItem('wc-system-urls');
+            console.log(user_systems);
+            //await AsyncStorage.removeItem('wc-system-urls');
             if (!user_systems){
               let WC_Systems = {
                 name: "WC_Systems",
@@ -87,12 +88,12 @@ const UrlScreen = ({ navigation }) => {
     };
 
     function parseURL(URL){
-        URL != '' ? mie.practice.value = URL.substring(8, text.indexOf('.')) : mie.practice.value = text.substring(8, text.indexOf('.'));
+        URL != '' ? mie.practice.value = URL.substring(8, URL.indexOf('.')) : mie.practice.value = text.substring(8, text.indexOf('.'));
         URL == '' ? mie.URL.value = text.substring(0,text.indexOf(".com")+4) + '/webchart.cgi' : mie.URL.value = URL;
     }
 
     async function navigateToLogin(URL){
-        if (isError){
+        if (isError && URL == ''){
             setIsError(true);
             setWarning('Invalid WebChart URL');
         } else {
@@ -109,10 +110,10 @@ const UrlScreen = ({ navigation }) => {
               await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
             } else { 
               //set URL to the front of the list
-              user_Systems_URLS.pop(mie.URL.value);
+              user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
               user_Systems_URLS.unshift(mie.URL.value);
               user_Systems.system_URLS = user_Systems_URLS;
-              await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+            await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
             }
             
 
@@ -127,7 +128,7 @@ const UrlScreen = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.welcome}>
             <Image 
-                source={require('./../../assets/wc-logo.jpg')}
+                source={require('./../../Assets/wc-logo.jpg')}
                 style={styles.wc_logo}
             /> 
             <Text style={styles.welcomeMessage}>Welcome to WebChart Go</Text>

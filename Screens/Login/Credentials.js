@@ -74,7 +74,7 @@ const Credentials = ({ navigation }) => {
             <SafeAreaView style={styles.container}>
                 <View style={styles.welcome}>
                     <Image 
-                        source={require('./../../assets/wc-logo.jpg')}
+                        source={require('./../../Assets/wc-logo.jpg')}
                         style={styles.wc_logo}
                     /> 
                     <Text style={styles.welcomeMessage}>{mie.practice.value}</Text>
