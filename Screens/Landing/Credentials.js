@@ -9,9 +9,9 @@ import {
   Platform
 } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
-import InputBox from './../../Components/inputBox';
-import InputButton from './../../Components/inputButton';
-import Warning from './../../Components/warning';
+import InputBox from '../../Components/inputBox';
+import InputButton from '../../Components/inputButton';
+import Warning from '../../Components/warning';
 
 const Credentials = ({ navigation }) => {
   

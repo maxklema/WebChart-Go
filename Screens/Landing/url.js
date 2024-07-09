@@ -11,9 +11,9 @@ import {
   Platform
 } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
-import InputBox from './../../Components/inputBox';
-import InputButton from './../../Components/inputButton';
-import Warning from './../../Components/warning';
+import InputBox from '../../Components/inputBox';
+import InputButton from '../../Components/inputButton';
+import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
 
 const UrlScreen = ({ navigation }) => {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgb(250,250,250)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   recent_URL_Button: {
     marginTop: '3%',
-    backgroundColor: 'rgb(250,250,250)',
+    backgroundColor: 'rgb(240,240,240)',
     width: '75%',
     alignSelf: 'center'
   },
