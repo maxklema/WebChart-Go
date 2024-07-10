@@ -1,40 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   StyleSheet, 
   Text, 
+  TouchableOpacity, 
   View,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
+const DataCell = ({data, type, deleteMethod, openMethod}) => {
 
-const DataCell = ({data, type}) => {
+    const [isSession, setIsSession] = useState(true);    
 
-    const [wcData, setWcData] = useState(`${data}`);
-
-    const deleteData = async (type, data) => {
-        if (type == 'session'){
-            console.log(data);
-            await AsyncStorage.removeItem('mie_session_id');
-            setWcData('');//await AsyncStorage.getItem('mie_session_id'));
-        }
-    };
+    useFocusEffect(
+        React.useCallback(() => {
+            
+            if (type == 'system')
+                setIsSession(false);
+        }, [])
+    )
 
     return (
         <View>
-            { data != '' ? 
+            { (data != "") ? 
                 <View style={ styles.DataContainer}>
-                    <View style={ styles.DataValue} >
-                        <Text numberOfLines={1} ellipsizeMode="end">{wcData}</Text>
+                    <View style={[isSession && styles.DataValue, !isSession && styles.DataValueSy ]} >
+                        <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
                     </View>
-                    <View style={ styles.DeleteDataValue}>
-                        <Button onPress={() => deleteData(type, wcData)}>
-                            <Ionicons name="trash-outline" size={21} color='red'></Ionicons>
-                        </Button>
-                    </View>
-                </View> 
-                : <Text>No Cookie</Text>
+                    { type == "system" ?
+                        <View style={ styles.DeleteDataValueSy }>
+                            <TouchableOpacity style={styles.trashIcon} onPress={() => deleteMethod(type, data)}>
+                                <Ionicons name="trash-outline" size={21} color='red'></Ionicons>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => openMethod(data)}>
+                                <Ionicons name="open-outline" size={21} color='#1992d4'></Ionicons>
+                            </TouchableOpacity>
+                        </View>  :
+                        <View style={ styles.DeleteDataValue }>
+                            <TouchableOpacity onPress={() => deleteMethod(type, data)}>
+                                <Ionicons name="trash-outline" size={21} color='red'></Ionicons>
+                            </TouchableOpacity>
+                        </View>
+                    }
+                </View> :
+                <View style={styles.noData}>
+                    <Text>No session cookies present. A cookie will appear here when you successfully log in into a WebChart System.</Text>
+                </View>
+                
             }
         </View>
     );
@@ -44,21 +58,42 @@ const styles = StyleSheet.create({
     DataContainer: {
         marginTop: '3%',
         paddingHorizontal: '5%',
-        paddingVertical: '2%',
+        paddingVertical: '3.5%',
         backgroundColor: 'rgb(240,240,240)',
         borderRadius: 12,
         display: 'flex',
         flexDirection: 'row',
         overflow: 'hidden',
-        justifyContent: 'center',
         alignItems: 'center'
     },
     DataValue: {
-        width: '85%',
+        width: '90%',
+    },
+    DataValueSy: {
+        width: '80%',
     },
     DeleteDataValue: {
-        width: '15%',
+        width: '10%',
+        flexDirection: 'row-reverse'
+
     },
+    DeleteDataValueSy: {
+        width: '20%',
+        padding: 0,
+        margin: 0,
+        flexDirection: 'row-reverse',
+    },
+    trashIcon: {
+        marginLeft: '15%'
+    },
+    noData: {
+        width: '100%',
+        backgroundColor: 'rgb(240,240,240)',
+        marginTop: '3%',
+        paddingHorizontal: '5%',
+        paddingVertical: '3.5%',
+        borderRadius: 12
+    }
 })
 
 export default DataCell;

@@ -29,6 +29,13 @@ const UrlScreen = ({ navigation }) => {
     useFocusEffect(
       React.useCallback( () => {
 
+          if (text == ""){
+            setIsError(true);
+            setWarning("Invalid WebChart URL");
+            setShowWarning(false);
+            setOnload(true);
+          }
+
           async function setSystemsCookie() {
           
             const user_systems = await AsyncStorage.getItem('wc-system-urls');
@@ -116,6 +123,7 @@ const UrlScreen = ({ navigation }) => {
             await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
             }
             
+            onChangeText('');
 
             navigation.navigate('WebView');
         }
