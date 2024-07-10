@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "health",
-    "slug": "health",
+    "name": "WebChart Go",
+    "slug": "WebChart Go",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

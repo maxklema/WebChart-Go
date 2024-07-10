@@ -17,9 +17,10 @@ const WebViewScreen = () => {
             async function getStoredCookie() {
                 const mieSession = await AsyncStorage.getItem('mie_session_id');
                 if (!mieSession){
-                    await AsyncStorage.setItem('mie_session_id', 'na');
+                    await AsyncStorage.setItem('mie_session_id', '');
                 }
                 setSessionID(mieSession);
+
             }
             
             getStoredCookie();
@@ -59,7 +60,7 @@ const WebViewScreen = () => {
         let JSON_data;
         JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
         mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
-       
+        
         console.log('----------------------');
         console.log(mie.User_PatID.value);
         console.log(mie.Cookie.value);

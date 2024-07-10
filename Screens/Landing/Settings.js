@@ -1,20 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   StyleSheet, 
   Text, 
   View,
+  Switch,
   ScrollView,
   SafeAreaView, 
 } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
-import InputBox from '../../Components/inputBox';
 import InputButton from '../../Components/inputButton';
-import Warning from '../../Components/warning';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import DataCell from '../../Components/DataCell';
-import { Button } from 'react-native-paper';
+import { SettingsContext } from '../Context/context';
 
 const Container = ({children}) => {
     return (
@@ -36,6 +34,12 @@ const Settings = ({navigation}) => {
     const [sessionData, setSessionData] = useState('');
     const [storedSystems, setStoredSystems] = useState([]);
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
+    const {isToggled, setIsToggled} = useContext(SettingsContext);
+    
+    const toggleSwitch = () => {
+        setIsToggled(previousState => !previousState);
+        console.log("NEW VALUE: " + isToggled);
+    }
 
     useFocusEffect(
         React.useCallback(() => {
@@ -87,6 +91,17 @@ const Settings = ({navigation}) => {
     return (
         <Container style={styles}>
             <View style={styles.parent_container}>
+                <View style={styles.toggleContainer}>
+                    <Text>Automatic WebChart Launch</Text>
+                    <Switch 
+                        onValueChange={toggleSwitch}
+                        value={isToggled}
+                        trackColor={{false: '#767577', true: 'red'}}
+                        thumbColor={isToggled ? '#f5dd4b' : '#f4f3f4'}
+                        ios_backgroundColor="#3e3e3e"
+                    />
+
+                </View>
                 <View style={styles.session_container}>
                     <Text style={styles.header}>Session Data</Text>
                     <DataCell deleteMethod={deleteData} data={sessionData} type="session" />
@@ -192,6 +207,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 13,
         color: 'rgb(50,50,50)'
+    },
+    toggleContainer: {
+        
     }
 
 

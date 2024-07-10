@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
@@ -8,13 +8,15 @@ import {
   SafeAreaView, 
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  StatusBar
 } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
 import InputBox from '../../Components/inputBox';
 import InputButton from '../../Components/inputButton';
 import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
+import { SettingsContext } from '../Context/context';
 
 const UrlScreen = ({ navigation }) => {
 
@@ -24,7 +26,6 @@ const UrlScreen = ({ navigation }) => {
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
-
 
     useFocusEffect(
       React.useCallback( () => {
@@ -36,10 +37,10 @@ const UrlScreen = ({ navigation }) => {
             setOnload(true);
           }
 
-          async function setSystemsCookie() {
+          async function setSystemsData() {
           
             const user_systems = await AsyncStorage.getItem('wc-system-urls');
-            console.log(user_systems);
+
             //await AsyncStorage.removeItem('wc-system-urls');
             if (!user_systems){
               let WC_Systems = {
@@ -51,11 +52,16 @@ const UrlScreen = ({ navigation }) => {
             } else {
               const parsed_us = JSON.parse(user_systems);
               setStoredSystems(parsed_us.system_URLS);
+
+              //get most recent system
+              // let mostRecentSystem = parsed_us.system_URLS[0];
+              // parseURL(mostRecentSystem);
+              // navigation.navigate('WebView');
             }
             
           }
 
-          setSystemsCookie(); 
+          setSystemsData(); 
           
       }, [])
     );
@@ -134,6 +140,11 @@ const UrlScreen = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.kbContainer}>
         <SafeAreaView style={styles.container}>
+            <StatusBar 
+              hidden={false}
+              animated={true}
+              barStyle="default"
+            />
             <View style={styles.welcome}>
             <Image 
                 source={require('./../../Assets/wc-logo.jpg')}
