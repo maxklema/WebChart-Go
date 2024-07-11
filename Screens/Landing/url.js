@@ -26,6 +26,37 @@ const UrlScreen = ({ navigation }) => {
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
+    const {isToggled, setIsToggled} = useContext(SettingsContext);
+
+    useEffect( () => {
+      
+      async function getSettings() {
+
+        if (isToggled){
+          async function launchRecentSystem () {
+  
+              const user_systems = await AsyncStorage.getItem('wc-system-urls');
+  
+              console.log(user_systems);
+
+              if (user_systems) {
+                  const parsed_US = JSON.parse(user_systems);
+                  if (parsed_US.system_URLS.length > 0){
+                    const recentWC = parsed_US.system_URLS[0];
+                    mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
+                    mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
+                    navigation.navigate('WebView');
+                  }
+                
+              }
+          }
+          launchRecentSystem();
+        } 
+      }
+
+      getSettings();
+
+    }, [navigation])
 
     useFocusEffect(
       React.useCallback( () => {

@@ -36,9 +36,9 @@ const Settings = ({navigation}) => {
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
     const {isToggled, setIsToggled} = useContext(SettingsContext);
     
-    const toggleSwitch = () => {
+    const toggleSwitch = async () => {
         setIsToggled(previousState => !previousState);
-        console.log("NEW VALUE: " + isToggled);
+        await AsyncStorage.setItem('wc-automatic-launch', `${!isToggled}`)
     }
 
     useFocusEffect(
@@ -92,13 +92,13 @@ const Settings = ({navigation}) => {
         <Container style={styles}>
             <View style={styles.parent_container}>
                 <View style={styles.toggleContainer}>
-                    <Text>Automatic WebChart Launch</Text>
+                    <Text style={styles.toggleText} >Automatic WebChart Launch</Text>
                     <Switch 
                         onValueChange={toggleSwitch}
                         value={isToggled}
-                        trackColor={{false: '#767577', true: 'red'}}
-                        thumbColor={isToggled ? '#f5dd4b' : '#f4f3f4'}
-                        ios_backgroundColor="#3e3e3e"
+                        trackColor={{false: '#adadad', true: '#d65b27'}}
+                        thumbColor={isToggled ? '#f4f3f4' : '#f4f3f4'}
+                        ios_backgroundColor="#adadad"
                     />
 
                 </View>
@@ -209,7 +209,17 @@ const styles = StyleSheet.create({
         color: 'rgb(50,50,50)'
     },
     toggleContainer: {
-        
+        display: 'flex',
+        flexDirection: 'row',
+        alignContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '10%',
+    },
+    toggleText: {
+        alignSelf: 'center',
+        fontSize: 17,
+        fontWeight: '500'
     }
 
 
