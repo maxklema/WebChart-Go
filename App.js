@@ -47,7 +47,7 @@ const Tab = createBottomTabNavigator();
   }
 
 
-  const App = ({ navigation }) => {
+  const App = () => {
 
       return (
         <SettingsProvider>

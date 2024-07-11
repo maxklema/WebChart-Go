@@ -37,8 +37,6 @@ const UrlScreen = ({ navigation }) => {
   
               const user_systems = await AsyncStorage.getItem('wc-system-urls');
   
-              console.log(user_systems);
-
               if (user_systems) {
                   const parsed_US = JSON.parse(user_systems);
                   if (parsed_US.system_URLS.length > 0){
