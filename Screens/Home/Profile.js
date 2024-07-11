@@ -123,7 +123,7 @@ const Profile = ({navigation}) => {
     return (
         <MainContainer>
             <Image 
-                source={require('./../../assets/profile-default.jpg')}
+                source={require('./../../Assets/profile-default.jpg')}
                 style={ styles.wc_pic }
             />
             <View style={ styles.wc_name }>

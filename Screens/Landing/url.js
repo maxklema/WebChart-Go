@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
@@ -8,13 +8,15 @@ import {
   SafeAreaView, 
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  StatusBar
 } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
-import InputBox from './../../Components/inputBox';
-import InputButton from './../../Components/inputButton';
-import Warning from './../../Components/warning';
+import InputBox from '../../Components/inputBox';
+import InputButton from '../../Components/inputButton';
+import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
+import { SettingsContext } from '../Context/context';
 
 const UrlScreen = ({ navigation }) => {
 
@@ -24,15 +26,53 @@ const UrlScreen = ({ navigation }) => {
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
+    const {isToggled, setIsToggled} = useContext(SettingsContext);
 
+    useEffect( () => {
+      
+      async function getSettings() {
+
+        if (isToggled){
+          async function launchRecentSystem () {
+  
+              const user_systems = await AsyncStorage.getItem('wc-system-urls');
+  
+              console.log(user_systems);
+
+              if (user_systems) {
+                  const parsed_US = JSON.parse(user_systems);
+                  if (parsed_US.system_URLS.length > 0){
+                    const recentWC = parsed_US.system_URLS[0];
+                    mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
+                    mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
+                    navigation.navigate('WebView');
+                  }
+                
+              }
+          }
+          launchRecentSystem();
+        } 
+      }
+
+      getSettings();
+
+    }, [navigation])
 
     useFocusEffect(
       React.useCallback( () => {
 
-          async function setSystemsCookie() {
+          if (text == ""){
+            setIsError(true);
+            setWarning("Invalid WebChart URL");
+            setShowWarning(false);
+            setOnload(true);
+          }
+
+          async function setSystemsData() {
           
             const user_systems = await AsyncStorage.getItem('wc-system-urls');
-            // await AsyncStorage.removeItem('wc-system-urls');
+
+            //await AsyncStorage.removeItem('wc-system-urls');
             if (!user_systems){
               let WC_Systems = {
                 name: "WC_Systems",
@@ -43,11 +83,16 @@ const UrlScreen = ({ navigation }) => {
             } else {
               const parsed_us = JSON.parse(user_systems);
               setStoredSystems(parsed_us.system_URLS);
+
+              //get most recent system
+              // let mostRecentSystem = parsed_us.system_URLS[0];
+              // parseURL(mostRecentSystem);
+              // navigation.navigate('WebView');
             }
             
           }
 
-          setSystemsCookie(); 
+          setSystemsData(); 
           
       }, [])
     );
@@ -87,12 +132,12 @@ const UrlScreen = ({ navigation }) => {
     };
 
     function parseURL(URL){
-        URL != '' ? mie.practice.value = URL.substring(8, text.indexOf('.')) : mie.practice.value = text.substring(8, text.indexOf('.'));
+        URL != '' ? mie.practice.value = URL.substring(8, URL.indexOf('.')) : mie.practice.value = text.substring(8, text.indexOf('.'));
         URL == '' ? mie.URL.value = text.substring(0,text.indexOf(".com")+4) + '/webchart.cgi' : mie.URL.value = URL;
     }
 
     async function navigateToLogin(URL){
-        if (isError){
+        if (isError && URL == ''){
             setIsError(true);
             setWarning('Invalid WebChart URL');
         } else {
@@ -109,12 +154,13 @@ const UrlScreen = ({ navigation }) => {
               await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
             } else { 
               //set URL to the front of the list
-              user_Systems_URLS.pop(mie.URL.value);
+              user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
               user_Systems_URLS.unshift(mie.URL.value);
               user_Systems.system_URLS = user_Systems_URLS;
-              await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+            await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
             }
             
+            onChangeText('');
 
             navigation.navigate('WebView');
         }
@@ -125,9 +171,14 @@ const UrlScreen = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.kbContainer}>
         <SafeAreaView style={styles.container}>
+            <StatusBar 
+              hidden={false}
+              animated={true}
+              barStyle="default"
+            />
             <View style={styles.welcome}>
             <Image 
-                source={require('./../../assets/wc-logo.jpg')}
+                source={require('./../../Assets/wc-logo.jpg')}
                 style={styles.wc_logo}
             /> 
             <Text style={styles.welcomeMessage}>Welcome to WebChart Go</Text>
@@ -205,7 +256,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgb(250,250,250)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -224,7 +275,7 @@ const styles = StyleSheet.create({
   },
   recent_URL_Button: {
     marginTop: '3%',
-    backgroundColor: 'rgb(250,250,250)',
+    backgroundColor: 'rgb(240,240,240)',
     width: '75%',
     alignSelf: 'center'
   },
