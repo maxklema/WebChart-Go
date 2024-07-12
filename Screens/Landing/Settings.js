@@ -36,9 +36,12 @@ const Settings = ({navigation}) => {
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
     const {isToggled, setIsToggled} = useContext(SettingsContext);
     
-    const toggleSwitch = async () => {
-        setIsToggled(previousState => !previousState);
-        await AsyncStorage.setItem('wc-automatic-launch', `${!isToggled}`)
+    const toggleSwitch = async (option) => {
+        setIsToggled((prevSettings) => ({
+            ...prevSettings,
+            [option]: !prevSettings[option]
+        }));
+        await AsyncStorage.setItem(option, `${!isToggled[option]}`)
     }
 
     useFocusEffect(
@@ -85,7 +88,7 @@ const Settings = ({navigation}) => {
     const openSystem = async(data) => {
         mie.practice.value = data.substring(8, data.indexOf('.'));
         mie.URL.value = data.substring(0,data.indexOf(".com")+4);
-        navigation.navigate('WebView');
+        navigation.navigate('WebChart');
     }
 
     return (
@@ -94,8 +97,19 @@ const Settings = ({navigation}) => {
                 <View style={styles.toggleContainer}>
                     <Text style={styles.toggleText} >Automatic WebChart Launch</Text>
                     <Switch 
-                        onValueChange={toggleSwitch}
-                        value={isToggled}
+                        onValueChange={() => toggleSwitch('automatic_wc_launch')}
+                        value={isToggled.automatic_wc_launch}
+                        trackColor={{false: '#adadad', true: '#d65b27'}}
+                        thumbColor={isToggled ? '#f4f3f4' : '#f4f3f4'}
+                        ios_backgroundColor="#adadad"
+                    />
+
+                </View>
+                <View style={styles.toggleContainer}>
+                    <Text style={styles.toggleText} >WebChart Bottom Navigation</Text>
+                    <Switch 
+                        onValueChange={() => toggleSwitch('webview_bottom_navbar')}
+                        value={isToggled.webview_bottom_navbar}
                         trackColor={{false: '#adadad', true: '#d65b27'}}
                         thumbColor={isToggled ? '#f4f3f4' : '#f4f3f4'}
                         ios_backgroundColor="#adadad"
