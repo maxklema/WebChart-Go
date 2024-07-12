@@ -85,7 +85,7 @@ const Settings = ({navigation}) => {
     const openSystem = async(data) => {
         mie.practice.value = data.substring(8, data.indexOf('.'));
         mie.URL.value = data.substring(0,data.indexOf(".com")+4);
-        navigation.navigate('WebView');
+        navigation.navigate('WebChart');
     }
 
     return (

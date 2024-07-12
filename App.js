@@ -8,6 +8,7 @@ import UrlScreen from './Screens/Landing/url';
 import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
 import { SettingsProvider } from './Screens/Context/context';
+import mie from '@maxklema/mie-api-tools';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -55,7 +56,7 @@ const Tab = createBottomTabNavigator();
             <NavigationContainer>
             <Stack.Navigator>
                 <Stack.Screen name="Back" component={NavBar} options={{ headerShown: false}}/>
-                <Stack.Screen name="WebView" component={WebViewScreen} />
+                <Stack.Screen name='WebChart' component={WebViewScreen} />
             </Stack.Navigator>
             </NavigationContainer>
           </PaperProvider>

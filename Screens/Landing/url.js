@@ -43,7 +43,7 @@ const UrlScreen = ({ navigation }) => {
                     const recentWC = parsed_US.system_URLS[0];
                     mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
                     mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
-                    navigation.navigate('WebView');
+                    navigation.navigate('WebChart');
                   }
                 
               }
@@ -82,10 +82,6 @@ const UrlScreen = ({ navigation }) => {
               const parsed_us = JSON.parse(user_systems);
               setStoredSystems(parsed_us.system_URLS);
 
-              //get most recent system
-              // let mostRecentSystem = parsed_us.system_URLS[0];
-              // parseURL(mostRecentSystem);
-              // navigation.navigate('WebView');
             }
             
           }
@@ -160,7 +156,7 @@ const UrlScreen = ({ navigation }) => {
             
             onChangeText('');
 
-            navigation.navigate('WebView');
+            navigation.navigate('WebChart');
         }
     }
 
