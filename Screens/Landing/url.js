@@ -42,7 +42,11 @@ const UrlScreen = ({ navigation }) => {
                   if (parsed_US.system_URLS.length > 0){
                     const recentWC = parsed_US.system_URLS[0];
                     mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
-                    mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
+                    if (!recentWC.includes("/webchart.cgi")) {
+                      mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
+                    } else {
+                      mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4);
+                    }
                     navigation.navigate('WebChart');
                   }
                 
@@ -106,57 +110,70 @@ const UrlScreen = ({ navigation }) => {
     const validateURL = (text) => {
         setOnload(false);
         setShowWarning(true);
-        if (!text.startsWith('https://')){
-            setWarningMessage('URL must begin with https://', true);
-            onChangeText(text);
-            return;
-        }
-        fetch(text, config)
-        .then(response => {
-            if (response.status == 200){
-                setWarningMessage('Invalid WebChart URL', true);
-            } else if (response.status == 401) {
-                setWarningMessage('Valid WebChart URL', false);
+        const URLtoFetch = `https://mie.webchartnow.com/webchart.cgi?f=layoutnouser&name=SystemLookup&raw&json&apikey=RKsVJOZZEgLIBuxZzxJjoW3nlMtIBirjdnId6YTvDRD&handle=${text}`;
+        
+        fetch(URLtoFetch, config)
+        .then((response) => response.text())
+        .then((result) => {
+          let data = JSON.parse(result);
+          
+          if (data['status'] != 200 && data['status'] != 403){
+            setWarningMessage('Invalid WebChart Handle', true);
+
+          } else if (data['status'] == 403){
+            setWarningMessage('Handle not Available for Mobile Use', true);
+
+          } else {
+            setWarningMessage('Valid WebChart Handle', false);
+            mie.practice.value = text;
+
+            if (!data['url'].includes("/webchart.cgi")) {
+              mie.URL.value = data['url'] + "webchart.cgi";
+            } else {
+              mie.URL.value = data['url'];
             }
+              
+
+          }
         })
-        .catch(() => {
-            setWarningMessage('Invalid WebChart URL', true);
+        .catch((e) => {
+            setWarningMessage('Invalid WebChart Handle', true);
             });
         onChangeText(text);
     };
 
-    function parseURL(URL){
-        URL != '' ? mie.practice.value = URL.substring(8, URL.indexOf('.')) : mie.practice.value = text.substring(8, text.indexOf('.'));
-        URL == '' ? mie.URL.value = text.substring(0,text.indexOf(".com")+4) + '/webchart.cgi' : mie.URL.value = URL;
-    }
-
-    async function navigateToLogin(URL){
+    async function navigateToLogin(URL = null){
         if (isError && URL == ''){
             setIsError(true);
             setWarning('Invalid WebChart URL');
         } else {
 
-            parseURL(URL);
+          if (URL){
+            mie.practice.value = URL.substring(8, URL.indexOf('.')) 
+            mie.URL.value = URL;
+          }
 
-            const user_Systems = JSON.parse(await AsyncStorage.getItem('wc-system-urls'));
-            const user_Systems_URLS = user_Systems.system_URLS;
+          const user_Systems = JSON.parse(await AsyncStorage.getItem('wc-system-urls'));
+          const user_Systems_URLS = user_Systems.system_URLS;
 
-            //check if URL is already stored
-            if (!user_Systems_URLS.includes(mie.URL.value)) {
-              user_Systems_URLS.unshift(mie.URL.value);
-              user_Systems.system_URLS = user_Systems_URLS;
-              await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
-            } else { 
-              //set URL to the front of the list
-              user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
-              user_Systems_URLS.unshift(mie.URL.value);
-              user_Systems.system_URLS = user_Systems_URLS;
+          //check if URL is already stored
+          if (!user_Systems_URLS.includes(mie.URL.value)) {
+            console.log(user_Systems_URLS);
+            user_Systems_URLS.unshift(mie.URL.value);
+            user_Systems.system_URLS = user_Systems_URLS;
             await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
-            }
-            
-            onChangeText('');
+          } else { 
+            //set URL to the front of the list
+            console.log(user_Systems_URLS);
+            user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
+            user_Systems_URLS.unshift(mie.URL.value);
+            user_Systems.system_URLS = user_Systems_URLS;
+          await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+          }
+          
+          onChangeText('');
 
-            navigation.navigate('WebChart');
+          navigation.navigate('WebChart');
         }
     }
 
@@ -181,7 +198,7 @@ const UrlScreen = ({ navigation }) => {
             <View style={styles.fields}>
             <InputBox
                 style={ (!onLoad && isError) && styles.inputError }
-                placeholder="WebChart URL"
+                placeholder="WebChart Handle"
                 text={ text }
                 onChangeText={ validateURL }
             />
@@ -189,7 +206,7 @@ const UrlScreen = ({ navigation }) => {
             <InputButton 
                 text="Continue"
                 style={ isError && styles.nullifyButton }
-                onPress={ () => navigateToLogin('') }
+                onPress={ () => navigateToLogin() }
             />
             </View>
             { storedSystems.length > 0 ?

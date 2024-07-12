@@ -60,13 +60,14 @@ const WebViewScreen = () => {
     const onMessage = async (event) => {
         
         const data = JSON.parse(event.nativeEvent.data);
+        console.log(data.Cookie);
         mie.Cookie.value = data.Cookie;
         await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
 
         let JSON_data;
         JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
         mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
-        
+
         console.log('----------------------');
         console.log(mie.User_PatID.value);
         console.log(mie.Cookie.value);

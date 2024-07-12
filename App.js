@@ -8,7 +8,6 @@ import UrlScreen from './Screens/Landing/url';
 import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
 import { SettingsProvider } from './Screens/Context/context';
-import mie from '@maxklema/mie-api-tools';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
