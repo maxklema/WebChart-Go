@@ -1,18 +1,26 @@
-import React, { useRef, useState } from "react";
-import { StyleSheet, Clipboard, View, Text, SafeAreaView, TouchableOpacity} from "react-native";
+import React, { useRef, useState, useContext } from "react";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity} from "react-native";
 import { WebView } from "react-native-webview";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import mie from '@maxklema/mie-api-tools';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as Clipboard from 'expo-clipboard';
+import { SettingsContext } from '../Context/context';
+
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
+
+const ConditionalWrapper = ({ condition, wrapper, children }) => 
+    condition ? wrapper(children) : children;
 
 const WebViewScreen = () => {
     
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
+    const {isToggled, setIsToggled} = useContext(SettingsContext);
+
 
     //back and forth buttons
     const [goBack, setGoBack] = useState(false);
@@ -78,12 +86,15 @@ const WebViewScreen = () => {
             webViewRef.current.goForward(); 
     }
 
-    const copyToClipboard = () => {
-        // Clipboard.setString(currentURL);
+    const copyToClipboard = async () => {
+        await Clipboard.setStringAsync(currentURL);
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <ConditionalWrapper
+            condition={isToggled.webview_bottom_navbar}
+            wrapper={children => <SafeAreaView style={styles.container}>{children}</SafeAreaView>}
+        >
             { sessionID !== '' ?
                 <WebView 
                     ref={webViewRef}
@@ -100,29 +111,31 @@ const WebViewScreen = () => {
                     sharedCookiesEnabled={true}
                 /> : <Text>Loading...</Text>
             }
-            <View style={styles.WV_Nav_bar}>
-                <View style={styles.nav_buttons}>
-                    <TouchableOpacity style={styles.backButton} onPress={navigateBack} disabled={!goBack}>
-                        { goBack == true ? 
-                            <Ionicons name="chevron-back-outline" size={26} color='#d15a27'></Ionicons>
-                        : <Ionicons name="chevron-back-outline" size={26} color='#b89282'></Ionicons>
-                        }
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={navigateForward} disabled={!goForward}>
-                        { goForward == true ? 
-                            <Ionicons name="chevron-forward-outline" size={26} color='#d15a27'></Ionicons>
-                            : <Ionicons name="chevron-forward-outline" size={26} color='#b89282'></Ionicons>
-                        }
-                    </TouchableOpacity>
-                </View>
-                <View>
-                    <TouchableOpacity onPress={copyToClipboard}>
-                        <Ionicons name="copy-outline" size={25} color='#d15a27'></Ionicons>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            {isToggled.webview_bottom_navbar == true ?
+                <View style={styles.WV_Nav_bar}>
+                    <View style={styles.nav_buttons}>
+                        <TouchableOpacity style={styles.backButton} onPress={navigateBack} disabled={!goBack}>
+                            { goBack == true ? 
+                                <Ionicons name="chevron-back-outline" size={26} color='#d15a27'></Ionicons>
+                            : <Ionicons name="chevron-back-outline" size={26} color='#b89282'></Ionicons>
+                            }
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={navigateForward} disabled={!goForward}>
+                            { goForward == true ? 
+                                <Ionicons name="chevron-forward-outline" size={26} color='#d15a27'></Ionicons>
+                                : <Ionicons name="chevron-forward-outline" size={26} color='#b89282'></Ionicons>
+                            }
+                        </TouchableOpacity>
+                    </View>
+                    <View>
+                        <TouchableOpacity onPress={copyToClipboard}>
+                            <Ionicons name="copy-outline" size={25} color='#d15a27'></Ionicons>
+                        </TouchableOpacity>
+                    </View>
+                </View> : 
+            <View /> }
             
-        </SafeAreaView>
+        </ConditionalWrapper>
     );
 };
 
@@ -131,12 +144,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
     },
-    webview: {
+    view: {
         flex: 1,
     },
     WV_Nav_bar: {
         display: 'flex',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
+        paddingHorizontal: '7%',
         flexDirection: 'row',
         paddingTop: '2%',
         backgroundColor: 'white'

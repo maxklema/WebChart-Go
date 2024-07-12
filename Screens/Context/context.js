@@ -7,24 +7,38 @@ export const SettingsContext = createContext();
 export const SettingsProvider = ({children}) => {
 
     const [toggleWCLaunch, setToggleWCLaunch] = useState('');
-    const [isToggled, setIsToggled] = useState(toggleWCLaunch);
+    const [toggleWVNav, setToggleWVNav] = useState('');
+    const [isToggled, setIsToggled] = useState({
+        'automatic_wc_launch': toggleWCLaunch,
+        'webview_bottom_navbar': toggleWVNav
+    });
+
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
 
         async function getSettings() {
 
-            const toggleAutomaticWCLaunch = await AsyncStorage.getItem('wc-automatic-launch');
-    
+            const toggleAutomaticWCLaunch = await AsyncStorage.getItem('automatic_wc_launch');
+            const toggleWebViewBottomNav = await AsyncStorage.getItem('webview_bottom_navbar');
+
             if (toggleAutomaticWCLaunch) {
-                let option = await AsyncStorage.getItem('wc-automatic-launch')
-                var isTrueSet = (option === 'true');
+                var isTrueSet = (toggleAutomaticWCLaunch === 'true');
                 setToggleWCLaunch(isTrueSet);
     
             } else {
-                await AsyncStorage.setItem('wc-automatic-launch', 'true')
+                await AsyncStorage.setItem('automatic_wc_launch', 'true')
                 setToggleWCLaunch(true);
             }
+
+            if (toggleWebViewBottomNav) {
+                var isTrueSet = (toggleWebViewBottomNav === 'true');
+                setToggleWVNav(isTrueSet);
+            } else {
+                await AsyncStorage.setItem('webview_bottom_navbar', 'true')
+                setToggleWVNav(true);
+            }
+
             setIsLoading(false);
         }
     
@@ -33,10 +47,14 @@ export const SettingsProvider = ({children}) => {
     }, []);
 
     useEffect(() => {
-        if (toggleWCLaunch !== '') {
-            setIsToggled(toggleWCLaunch);
+        if (toggleWCLaunch !== '' && toggleWVNav !== '') {
+            setIsToggled((prevSettings) => ({
+                ...prevSettings,
+                'automatic_wc_launch': toggleWCLaunch,
+                'webview_bottom_navbar': toggleWVNav
+            }));
         }
-    }, [toggleWCLaunch]);
+    }, [toggleWCLaunch, toggleWVNav]);
 
     if (isLoading) {
         return (

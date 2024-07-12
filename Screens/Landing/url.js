@@ -32,7 +32,7 @@ const UrlScreen = ({ navigation }) => {
       
       async function getSettings() {
 
-        if (isToggled){
+        if (isToggled.automatic_wc_launch){
           async function launchRecentSystem () {
   
               const user_systems = await AsyncStorage.getItem('wc-system-urls');
