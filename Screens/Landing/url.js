@@ -45,7 +45,7 @@ const UrlScreen = ({ navigation }) => {
                     if (!recentWC.includes("/webchart.cgi")) {
                       mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
                     } else {
-                      mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4);
+                      mie.URL.value = recentWC;
                     }
                     navigation.navigate('WebChart');
                   }
@@ -158,13 +158,11 @@ const UrlScreen = ({ navigation }) => {
 
           //check if URL is already stored
           if (!user_Systems_URLS.includes(mie.URL.value)) {
-            console.log(user_Systems_URLS);
             user_Systems_URLS.unshift(mie.URL.value);
             user_Systems.system_URLS = user_Systems_URLS;
             await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
           } else { 
             //set URL to the front of the list
-            console.log(user_Systems_URLS);
             user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
             user_Systems_URLS.unshift(mie.URL.value);
             user_Systems.system_URLS = user_Systems_URLS;
