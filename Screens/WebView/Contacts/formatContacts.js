@@ -12,6 +12,7 @@ const formatContacts = async (patInfo, contact_id) => {
         "middle_name": [Contacts.Fields.MiddleName],
         "title": [Contacts.Fields.Prefix],
         "suffix": [Contacts.Fields.Suffix],
+        "employer_name": [Contacts.Fields.Company],
         "email": [],
         "home_phone": [],
         "cell_phone": [],
@@ -69,6 +70,8 @@ const formatContacts = async (patInfo, contact_id) => {
                 continue;
         }
     }
+
+    // contact[[Contacts.Fields.JobTitle]] = "Unknown Position";
 
     if (contact_id != ''){
         const contact_exists = await Contacts.getContactByIdAsync(contact_id);

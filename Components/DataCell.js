@@ -8,7 +8,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 
-const DataCell = ({data, type, deleteMethod, openMethod}) => {
+const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
 
     const [isSession, setIsSession] = useState(true);    
 
@@ -25,7 +25,14 @@ const DataCell = ({data, type, deleteMethod, openMethod}) => {
             { (data != "") ? 
                 <View style={ styles.DataContainer}>
                     <View style={[isSession && styles.DataValue, !isSession && styles.DataValueSy ]} >
-                        <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
+                        { type == "contacts" ? 
+                            <Text style={styles.handleText} numberOfLines={1} ellipsizeMode="end">{practice}</Text> :
+                            <></>
+                        }
+                        { type == "contacts" ?
+                            <Text numberOfLines={1} ellipsizeMode="end">{data['title'] != "" ? `${data['title']} ` : ""}{data['first_name']} {data['last_name']} {data['suffix']} - {data['contact_id']}</Text> :
+                            <Text numberOfLines={1} ellipsizeMode="end">{data}</Text> 
+                        }
                     </View>
                     { type == "system" ?
                         <View style={ styles.DeleteDataValueSy }>
@@ -91,6 +98,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: '5%',
         paddingVertical: '3.5%',
         borderRadius: 12
+    },
+    handleText: {
+        fontSize: 13,
+        marginBottom: '1%'
     }
 })
 

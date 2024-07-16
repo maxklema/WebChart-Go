@@ -13,6 +13,9 @@ import mie from '@maxklema/mie-api-tools';
 import InputButton from '../../Components/inputButton';
 import DataCell from '../../Components/DataCell';
 import { SettingsContext } from '../Context/context';
+import * as Contacts from 'expo-contacts';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 const Container = ({children}) => {
     return (
@@ -33,6 +36,8 @@ const Settings = ({navigation}) => {
 
     const [sessionData, setSessionData] = useState('');
     const [storedSystems, setStoredSystems] = useState([]);
+    const [userContacts, setUserContacts] = useState([]);
+    
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
     const {isToggled, setIsToggled} = useContext(SettingsContext);
     
@@ -50,12 +55,17 @@ const Settings = ({navigation}) => {
             async function getCookie() {
                 const session_ID = await AsyncStorage.getItem('mie_session_id');
                 const user_systems = await AsyncStorage.getItem('wc-system-urls');
+                const user_contacts = await AsyncStorage.getItem('patient-contacts');
                 if (session_ID != '' && session_ID != null)
                     setSessionData(session_ID);
                 if (user_systems) {
                     const parsed_us = JSON.parse(user_systems);
                     setStoredSystems(parsed_us.system_URLS);
                 }
+                if (user_contacts) {
+                    parseContacts(user_contacts);
+                }
+
                 setUserSystemsRaw(JSON.parse(user_systems));
             }
 
@@ -64,17 +74,43 @@ const Settings = ({navigation}) => {
         }, [])
     )
 
-    const deleteData = async (type, data) => {
-        if (type == 'session'){
-            await AsyncStorage.removeItem('mie_session_id');           
-            setSessionData('');
-        } else {
-            let systems = storedSystems.filter(function (url) { return url != data});
-            setStoredSystems(systems);
-            let user_systems_whole = userSystemsRaw;
-            user_systems_whole.system_URLS = systems;
-            await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_systems_whole));
+    const parseContacts = (user_contacts) => {
+        const parsed_contacts = JSON.parse(user_contacts);
+        let contacts = []
+        for (const contact in parsed_contacts){
+            contacts.push(parsed_contacts[contact]);
         }
+        setUserContacts(contacts);
+    }
+
+    const deleteData = async (type, data) => {
+        switch(type) {
+            case "session":
+                await AsyncStorage.removeItem('mie_session_id');           
+                setSessionData('');
+                break;
+            case "system":
+                let systems = storedSystems.filter(function (url) { return url != data});
+                setStoredSystems(systems);
+                let user_systems_whole = userSystemsRaw;
+                user_systems_whole.system_URLS = systems;
+                await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_systems_whole));
+                break;
+            case "contacts":
+                let contact_id = data['contact_id'];
+                try { await Contacts.removeContactAsync(contact_id); } catch {}
+                let stored_contacts = JSON.parse(await AsyncStorage.getItem("patient-contacts"));
+                
+                for (let key in stored_contacts){
+                    if (stored_contacts[key]["contact_id"] == contact_id) {
+                        delete stored_contacts[key];
+                        await AsyncStorage.setItem("patient-contacts", JSON.stringify(stored_contacts));
+                        break;
+                    }
+                }
+                parseContacts(JSON.stringify(stored_contacts));
+        }
+    
     };
 
     const deleteSystems = async() => {
@@ -94,6 +130,8 @@ const Settings = ({navigation}) => {
     return (
         <Container style={styles}>
             <View style={styles.parent_container}>
+
+                {/* Toggle Automatic WC */}
                 <View style={styles.toggleContainer}>
                     <Text style={styles.toggleText} >Automatic WebChart Launch</Text>
                     <Switch 
@@ -103,8 +141,9 @@ const Settings = ({navigation}) => {
                         thumbColor={isToggled ? '#f4f3f4' : '#f4f3f4'}
                         ios_backgroundColor="#adadad"
                     />
-
                 </View>
+
+                {/* Toggle Bottom Navigation WC */}
                 <View style={styles.toggleContainer}>
                     <Text style={styles.toggleText} >WebChart Bottom Navigation</Text>
                     <Switch 
@@ -116,10 +155,29 @@ const Settings = ({navigation}) => {
                     />
 
                 </View>
-                <View style={styles.session_container}>
-                    <Text style={styles.header}>Session Data</Text>
-                    <DataCell deleteMethod={deleteData} data={sessionData} type="session" />
+
+                {/* WebChart Contacts Stored on Device */}
+                <View style={styles.contacts_container}>
+                    <Text style={styles.header}>Contacts</Text>
+                    { userContacts.length > 0 ? 
+                        <>
+                            <View style={styles.contact_warning}>
+                                <Ionicons name="alert-circle-outline" size={21} color='white'></Ionicons>
+                                <Text style={styles.contact_warning_text }>Deleting a contact will remove it from your local storage and your device's contacts.</Text>
+                            </View>
+                            <View>
+                                { userContacts?.map((contact, index) => (
+                                    <DataCell deleteMethod={deleteData} key={index} data={contact} practice={contact['wc_handle']} type="contacts" />
+                                ))}
+                            </View>
+                        </> :
+                    <View style={styles.noData}>
+                        <Text>No stored contacts. Contacts of users will appear here when you add them to your device's contacts from your WebChart system.</Text>
+                    </View>
+                }
                 </View>
+
+                {/* Systems Data  */}
                 <View style={styles.systems_container}>
                     <View style={ styles.systemsDataHeader}>
                         <Text style={styles.headerSy}>Systems Data</Text>
@@ -140,6 +198,14 @@ const Settings = ({navigation}) => {
                     }
                     
                 </View>
+
+                {/* Session Storage */}
+                <View style={styles.session_container}>
+                    <Text style={styles.header}>Session Data</Text>
+                    <DataCell deleteMethod={deleteData} data={sessionData} type="session" />
+                </View>
+
+
                 <View style={styles.copyright}>
                     <Text style={styles.copyrightTxt}>© 2024 WebChart, All rights reserved</Text>
                 </View>                
@@ -154,7 +220,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgb(250,250,250)'
     },
     parent_container: {
-        paddingHorizontal: '12.5%',
+        paddingHorizontal: '8%',
         paddingVertical: '5%'
     },
     header: {
@@ -183,7 +249,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     systems_container: {
-        marginTop: '10%'
+        marginBottom: '10%'
     },
     systemsDataHeader: {
         display: 'flex',
@@ -234,6 +300,29 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         fontSize: 17,
         fontWeight: '500'
+    },
+
+    // Contacts
+    contacts_container: {
+        marginBottom: '10%',
+    },
+
+    contact_warning: {
+        marginTop: '2%',
+        paddingHorizontal: '6.5%',
+        paddingVertical: '2.5%',
+        backgroundColor: '#d65b27',
+        borderRadius: 12,
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+
+    contact_warning_text: {
+        textAlign: 'left',
+        color: 'white',
+        marginLeft: '3%',
     }
 
 
