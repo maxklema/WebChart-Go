@@ -1,5 +1,5 @@
-import React, { useRef, useState, useContext } from "react";
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity} from "react-native";
+import React, { useRef, useState, useContext, useEffect } from "react";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Linking} from "react-native";
 import { WebView } from "react-native-webview";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import mie from '@maxklema/mie-api-tools';
@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
-
+import getContacts from "./Contacts/getContacts";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
@@ -20,7 +20,7 @@ const WebViewScreen = () => {
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
     const {isToggled, setIsToggled} = useContext(SettingsContext);
-
+    const [patID, setPatID] = useState(null);
 
     //back and forth buttons
     const [goBack, setGoBack] = useState(false);
@@ -40,7 +40,7 @@ const WebViewScreen = () => {
             }
             getStoredCookie();
         }, [])
-    )
+    ) 
 
     const navStateChange = (navState) => {
         const { url } = navState;
@@ -52,25 +52,34 @@ const WebViewScreen = () => {
         //inject JS into the browser
         if (url.endsWith('webchart.cgi?func=omniscope')) {
             webViewRef.current.injectJavaScript(homePageJSInject);
-        } else if (url.includes('pat_id=55')) {
+        } else if (url.includes('pat_id=')) {
+            setPatID(parseInt(url.substring(url.indexOf('pat_id=')+7,url.length)))
             webViewRef.current.injectJavaScript(patientPageJSInject);
         }
     }       
 
     const onMessage = async (event) => {
         
-        const data = JSON.parse(event.nativeEvent.data);
-        console.log(data.Cookie);
-        mie.Cookie.value = data.Cookie;
-        await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
+        const message = event.nativeEvent.data;
 
-        let JSON_data;
-        JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
-        mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+        if (message == 'getContacts'){
+            getContacts(patID);
+        } else {
+            const data = JSON.parse(event.nativeEvent.data);
+            console.log(data.Cookie);
+            mie.Cookie.value = data.Cookie;
+            await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
 
-        console.log('----------------------');
-        console.log(mie.User_PatID.value);
-        console.log(mie.Cookie.value);
+            let JSON_data;
+            JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
+            mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+
+            console.log('----------------------');
+            console.log(mie.User_PatID.value);
+            console.log(mie.Cookie.value);
+        }
+
+        
     }
 
     const headers = {

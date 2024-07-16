@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+app.json
 
 # Expo
 .expo/
@@ -33,5 +34,8 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-
 test.html
+eas.json
+test2.html
+
+.npmrc

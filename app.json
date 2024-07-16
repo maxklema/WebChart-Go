@@ -13,7 +13,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.medical-informatics-engineering-inc.Webchart-Go"
+      "bundleIdentifier": "com.medical-informatics-engineering-inc.Webchart-Go",
+      "distributionCertificate": {
+        "path": "",
+        "password": ""
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +32,14 @@
       "eas": {
         "projectId": "dc8a525a-aac9-496c-ada2-6772d4578634"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
+        }
+      ]
+    ]
   }
 }
