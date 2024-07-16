@@ -34,8 +34,11 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-test.html
+*.html
 eas.json
-test2.html
 
 .npmrc
+test2.html
+
+babel.config.cjs
+metro.config.js
