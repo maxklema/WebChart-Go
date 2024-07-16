@@ -7,8 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
-import * as Contacts from 'expo-contacts';
-
+import getContacts from "./Contacts/getContacts";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
@@ -21,6 +20,7 @@ const WebViewScreen = () => {
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
     const {isToggled, setIsToggled} = useContext(SettingsContext);
+    const [patID, setPatID] = useState(null);
 
     //back and forth buttons
     const [goBack, setGoBack] = useState(false);
@@ -40,105 +40,7 @@ const WebViewScreen = () => {
             }
             getStoredCookie();
         }, [])
-    )
-
-    const getPatientInfo = async () => {
-        
-        const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone" ]
-
-        let patInfo = await mie.retrieveRecord("patients", fields, { pat_id: 18})
-        return patInfo;
-    }
- 
-    const getContacts = () => {
-        (async () => {
-            try {
-                const { status } = await Contacts.requestPermissionsAsync();
-                if (status === 'granted') {
-                    
-                    const contact_fields = {
-                        "first_name": [Contacts.Fields.FirstName],
-                        "last_name": [Contacts.Fields.LastName],
-                        "middle_name": [Contacts.Fields.MiddleName],
-                        "title": [Contacts.Fields.Prefix],
-                        "suffix": [Contacts.Fields.Suffix],
-                        "email": [],
-                        "home_phone": [],
-                        "cell_phone": [],
-                        "emergency_phone": [],
-                        "birth_date": "",
-                        "address1": "",
-                        "address2": "",
-                        "address3": ""
-                    }
-                    let patInfo = await getPatientInfo();
-
-                    let contact = {}
-                    let emails = []
-                    let phones = []
-                    let addresses = []
-
-                    for (const key in contact_fields){
-                        if (key == "email"){
-                            let email = {
-                                email: patInfo[0][key],
-                                label: "Email"
-                            }
-                            emails.push(email)
-                            contact[Contacts.Fields.Emails] = emails;
-                        } else if (key.endsWith("phone")) {
-                            let phone = {
-                                number: patInfo[0][key],
-                                "label": key.substring(0,key.indexOf("_"))
-                            }
-                            phones.push(phone);
-                            contact[Contacts.Fields.PhoneNumbers] = phones;
-
-                        } else if (key == "birth_date") {
-                            
-                            let raw_birthday = patInfo[0][key];
-                            const birth_year = parseInt(raw_birthday.substring(0,4));
-                            const birth_month = parseInt(raw_birthday.substring(5,7));
-                            const birth_day = parseInt(raw_birthday.substring(8,10));
-
-                            contact[Contacts.Fields.Birthday] =  { 
-                                day: birth_day,
-                                month: birth_month-1, 
-                                year: birth_year 
-                            }
-
-                        } else if (key.startsWith('address')) {
-                            let address = {
-                                label: key,
-                                street: patInfo[0][key]
-                            }
-
-                            if (patInfo[0][key] != "")
-                                addresses.push(address);
-                            contact[Contacts.Fields.Addresses] = addresses;
-                        } else {
-                            contact[contact_fields[key]] = patInfo[0][key];
-                        }
-                        
-                    }
-
-                    // console.log(JSON.stringify(contact));
-                    const contactId = await Contacts.addContactAsync(contact);
-                    console.log(contactId);
-                    
-
-                } else {
-                    alert('Cannot add Patient to Contacts');
-                }
-            } catch (e) {
-                console.log(e);
-                // const { canAskAgain } = await Contacts.requestPermissionsAsync();
-                // if (canAskAgain)
-                //     Linking.openSettings();
-            }
-                        
-        })();
-    }
+    ) 
 
     const navStateChange = (navState) => {
         const { url } = navState;
@@ -150,7 +52,8 @@ const WebViewScreen = () => {
         //inject JS into the browser
         if (url.endsWith('webchart.cgi?func=omniscope')) {
             webViewRef.current.injectJavaScript(homePageJSInject);
-        } else if (url.includes('pat_id=55')) {
+        } else if (url.includes('pat_id=')) {
+            setPatID(parseInt(url.substring(url.indexOf('pat_id=')+7,url.length)))
             webViewRef.current.injectJavaScript(patientPageJSInject);
         }
     }       
@@ -160,7 +63,7 @@ const WebViewScreen = () => {
         const message = event.nativeEvent.data;
 
         if (message == 'getContacts'){
-            getContacts();
+            getContacts(patID);
         } else {
             const data = JSON.parse(event.nativeEvent.data);
             console.log(data.Cookie);

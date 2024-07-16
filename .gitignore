@@ -36,3 +36,6 @@ yarn-error.*
 *.tsbuildinfo
 test.html
 eas.json
+test2.html
+
+.npmrc
