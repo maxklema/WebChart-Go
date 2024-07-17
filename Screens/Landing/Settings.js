@@ -224,12 +224,12 @@ const styles = StyleSheet.create({
         paddingVertical: '5%'
     },
     header: {
-        fontSize: '19',
+        fontSize: 19,
         fontWeight: '600',
         color: 'rgb(50,50,50)'
     },
     headerSy: {
-        fontSize: '19',
+        fontSize: 19,
         fontWeight: '600',
         color: 'rgb(50,50,50)',
         alignSelf: 'center',

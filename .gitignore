@@ -2,7 +2,6 @@
 
 # dependencies
 node_modules/
-app.json
 
 # Expo
 .expo/
@@ -35,10 +34,15 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 *.html
-eas.json
 
-.npmrc
+
 test2.html
 
+#unignore for builds
+.npmrc
+metro.config.mjs
 babel.config.cjs
-metro.config.js
+eas.json
+index.js
+
+

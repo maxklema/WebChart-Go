@@ -100,6 +100,10 @@ const WebViewScreen = () => {
         await Clipboard.setStringAsync(currentURL);
     }
 
+    const refreshPage = () => {
+        webViewRef.current.reload();
+    }
+
     return (
         <ConditionalWrapper
             condition={isToggled.webview_bottom_navbar}
@@ -135,6 +139,11 @@ const WebViewScreen = () => {
                                 <Ionicons name="chevron-forward-outline" size={26} color='#d15a27'></Ionicons>
                                 : <Ionicons name="chevron-forward-outline" size={26} color='#b89282'></Ionicons>
                             }
+                        </TouchableOpacity>
+                    </View>
+                    <View>
+                        <TouchableOpacity onPress={refreshPage}>
+                            <Ionicons name="refresh-outline" size={25} color='#d15a27'></Ionicons>
                         </TouchableOpacity>
                     </View>
                     <View>

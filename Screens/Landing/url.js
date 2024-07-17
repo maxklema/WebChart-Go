@@ -17,6 +17,7 @@ import InputButton from '../../Components/inputButton';
 import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
 import { SettingsContext } from '../Context/context';
+import * as Linking from 'expo-linking';
 
 const UrlScreen = ({ navigation }) => {
 
@@ -175,6 +176,11 @@ const UrlScreen = ({ navigation }) => {
         }
     }
 
+    const makePhoneCall = (phoneNumber) => {
+      Linking.openURL(`sms:${phoneNumber}`);
+    };
+    
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -205,6 +211,10 @@ const UrlScreen = ({ navigation }) => {
                 text="Continue"
                 style={ isError && styles.nullifyButton }
                 onPress={ () => navigateToLogin() }
+            />
+            <InputButton 
+                text="Call Patient"
+                onPress={ () => makePhoneCall('2604440099') }
             />
             </View>
             { storedSystems.length > 0 ?
@@ -268,6 +278,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(250,250,250)',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: '8%'
   },
   inputError: {
     borderColor: 'red'
@@ -280,18 +291,18 @@ const styles = StyleSheet.create({
     display: 'flex'
   },
   nullifyButton: {
-    opacity: '0.4'
+    opacity: 0.4
   },
   recent_URL_Button: {
     marginTop: '3%',
     backgroundColor: 'rgb(240,240,240)',
-    width: '75%',
+    width: '100%',
     alignSelf: 'center'
   },
   Button_Text: {
     color: 'rgb(50,50,50)',
     textAlign: 'center',
-    fontSize: '14',
+    fontSize: 14,
   }
  
 });
