@@ -16,6 +16,7 @@ const formatContacts = async (patInfo, contact_id) => {
         "home_phone": [],
         "cell_phone": [],
         "emergency_phone": [],
+        "work_phone": [],
         "birth_date": "",
         "address1": "",
         "address2": "",

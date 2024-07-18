@@ -7,11 +7,17 @@ export const patientPageJSInject = `
             container.insertBefore(newHTML, container.firstChild);
 
             let contacts = document.getElementById('contacts');
+            let message = document.getElementById('message');
 
-            contacts.addEventListener('click', myFunction);
+            contacts.addEventListener('click', getContacts);
+            message.addEventListener('click', sendMessage);
 
-            function myFunction() {
+            function getContacts() {
                 window.ReactNativeWebView.postMessage('getContacts');
+            }
+
+            function sendMessage() {
+                window.ReactNativeWebView.postMessage('sendMessage');
             }
         }, 10)        
         

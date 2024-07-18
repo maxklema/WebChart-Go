@@ -17,7 +17,6 @@ import InputButton from '../../Components/inputButton';
 import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
 import { SettingsContext } from '../Context/context';
-import * as Linking from 'expo-linking';
 
 const UrlScreen = ({ navigation }) => {
 
@@ -27,6 +26,7 @@ const UrlScreen = ({ navigation }) => {
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
+
     const {isToggled, setIsToggled} = useContext(SettingsContext);
 
     useEffect( () => {
@@ -176,11 +176,6 @@ const UrlScreen = ({ navigation }) => {
         }
     }
 
-    const makePhoneCall = (phoneNumber) => {
-      Linking.openURL(`sms:${phoneNumber}`);
-    };
-    
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -209,19 +204,16 @@ const UrlScreen = ({ navigation }) => {
             <Warning text={ warning } style={ [!isError && styles.validURL, (showWarning && isError ) && styles.invalidURL ] }/>
             <InputButton 
                 text="Continue"
+                disabled={isError}
                 style={ isError && styles.nullifyButton }
                 onPress={ () => navigateToLogin() }
-            />
-            <InputButton 
-                text="Call Patient"
-                onPress={ () => makePhoneCall('2604440099') }
             />
             </View>
             { storedSystems.length > 0 ?
             <View style={ styles.Container_RecentSystems }>
                 <Text style={styles.welcomeInstructions}>Recent Systems</Text>
                 { storedSystems.slice(0,3)?.map((URL, index) => (
-                  <Button onPress={() => navigateToLogin(URL)} key={index} style={ styles.recent_URL_Button} >
+                  <Button onPress={() => navigateToLogin(URL)} key={index} style={ styles.recent_URL_Button}>
                     <Text style={ styles.Button_Text }>{URL}</Text>
                   </Button>
                 ))}

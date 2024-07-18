@@ -6,7 +6,7 @@ import mie from '@maxklema/mie-api-tools';
 
 const getPatientInfo = async (patID) => {
         
-    const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone" ]
+    const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone", "work_phone" ]
 
     let patInfo = await mie.retrieveRecord("patients", fields, { pat_id: patID})
     return patInfo;

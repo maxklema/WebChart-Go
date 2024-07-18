@@ -8,6 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
 import getContacts from "./Contacts/getContacts";
+import sendMessage from "./Messaging/sendMessage";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
@@ -56,29 +57,33 @@ const WebViewScreen = () => {
             setPatID(parseInt(url.substring(url.indexOf('pat_id=')+7,url.length)))
             webViewRef.current.injectJavaScript(patientPageJSInject);
         }
-    }       
+    }
 
     const onMessage = async (event) => {
         
         const message = event.nativeEvent.data;
 
-        if (message == 'getContacts'){
-            getContacts(patID);
-        } else {
-            const data = JSON.parse(event.nativeEvent.data);
-            console.log(data.Cookie);
-            mie.Cookie.value = data.Cookie;
-            await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
-
-            let JSON_data;
-            JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
-            mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
-
-            console.log('----------------------');
-            console.log(mie.User_PatID.value);
-            console.log(mie.Cookie.value);
+        switch(message) {
+            case 'getContacts':
+                getContacts(patID);
+                break;
+            case 'sendMessage':
+                sendMessage(patID)
+                break;
+            default:
+                const data = JSON.parse(event.nativeEvent.data);
+                console.log(data.Cookie);
+                mie.Cookie.value = data.Cookie;
+                await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
+    
+                let JSON_data;
+                JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
+                mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+    
+                console.log('----------------------');
+                console.log(mie.User_PatID.value);
+                console.log(mie.Cookie.value);
         }
-
         
     }
 
