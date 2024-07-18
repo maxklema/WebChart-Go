@@ -1,6 +1,5 @@
 import mie from '@maxklema/mie-api-tools';
 import * as FileSystem from 'expo-file-system';
-import * as Crypto from 'expo-crypto'; 
 
 const createInteraction = async (type, patID, contactHandle, patName) => {
 
@@ -22,7 +21,7 @@ const createInteraction = async (type, patID, contactHandle, patName) => {
             interactionsData[mie.practice.value] = {};
         
         //generate unique UUID for activity log
-        const UUID = Crypto.randomUUID();
+        const epoch = Date.now();
 
         const date = new Date();
 
@@ -35,7 +34,7 @@ const createInteraction = async (type, patID, contactHandle, patName) => {
         }
 
         //write new data
-        interactionsData[mie.practice.value][UUID] = interaction
+        interactionsData[mie.practice.value][epoch] = interaction
         await FileSystem.writeAsStringAsync(interactionsURI, JSON.stringify(interactionsData));
 }
 

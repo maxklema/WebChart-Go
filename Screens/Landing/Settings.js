@@ -1,36 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { 
-  StyleSheet, 
-  Text, 
-  View,
-  Switch,
-  ScrollView,
-  SafeAreaView, 
-} from 'react-native';
+import { StyleSheet, Text, View,Switch } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
 import InputButton from '../../Components/inputButton';
 import DataCell from '../../Components/DataCell';
 import { SettingsContext } from '../Context/context';
 import * as Contacts from 'expo-contacts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-
-const Container = ({children}) => {
-    return (
-        <SafeAreaView  style={styles.SAVContainer}>
-            <ScrollView alwaysBounceVertical={false}>
-                {React.Children.map(children, (child) => 
-                    React.cloneElement(child, {
-                        style: [child.props.style],
-                    })
-                )}
-
-            </ScrollView>
-        </SafeAreaView>
-    );
-}
+import Container from '../../Components/Container';
 
 const Settings = ({navigation}) => {
 
@@ -215,13 +193,9 @@ const Settings = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
-    SAVContainer: {
-        flex: 1,
-        backgroundColor: 'rgb(250,250,250)'
-    },
     parent_container: {
         paddingHorizontal: '8%',
-        paddingVertical: '5%'
+        paddingVertical: '5%',
     },
     header: {
         fontSize: 19,

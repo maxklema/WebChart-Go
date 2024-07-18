@@ -2,12 +2,14 @@ import mie from '@maxklema/mie-api-tools';
 import { Alert } from "react-native";
 import * as Open from 'expo-linking';
 import getPhoneNumbers from '../crawlNumbers';
+import createInteraction from '../../Interactions/createInteraction';
 
 const patientCallText = async (patID, type) => {
 
     const numbers = await getPhoneNumbers(patID);
-    let patName = await mie.retrieveRecord("patients", ["first_name"], {pat_id: patID});
-    patName = patName[0]["first_name"];
+    const patNameData = await mie.retrieveRecord("patients", ["email", "first_name", "last_name", "title", "suffix"], {pat_id: patID});
+    let patName = patNameData[0]["first_name"];
+    let patFullName = `${patNameData['0']['title'] != "" ? patNameData['0']['title'] : ""}${patNameData['0']['first_name']} ${patNameData['0']['last_name']} ${patNameData['0']['suffix']}`;
     let callOptions = [];
 
     //iterate over each number to put in the alert
@@ -17,9 +19,17 @@ const patientCallText = async (patID, type) => {
         let number = numbers[numberObj];
         let option = {
             text: `${numberType.charAt(0).toUpperCase() + numberType.slice(1)}`,
-            onPress: () => {
+            onPress: async () => {
                 number = number.replace(/\D/g, ''); //remove all chars that are not digits
-                type == "Text" ? Open.openURL(`sms:${number}`) : Open.openURL(`tel:${number}`);
+                if (type == "Text"){
+                    Open.openURL(`sms:${number}`);
+                    await createInteraction("SMS", patID, number, patFullName);
+                } else {
+                    Open.openURL(`tel:${number}`);
+                    await createInteraction("CALL", patID, number, patFullName);
+                }
+                
+
 
                 //eventually store local data for activity page about recent messages.
             }
