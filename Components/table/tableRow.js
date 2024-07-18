@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
   },
   key_text: {
     color: 'black',
-    fontSize: '17px',
+    fontSize: 17
   },
   value_text: {
     color: 'rgb(125,125,125)',
-    fontSize: '17px'
+    fontSize: 17
   },
   value: {
     display: 'flex',

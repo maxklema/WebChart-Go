@@ -13,11 +13,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.medical-informatics-engineering-inc.Webchart-Go",
-      "distributionCertificate": {
-        "path": "",
-        "password": ""
-      }
+      "bundleIdentifier": "com.maxwell-klema.Webchart-Go"
     },
     "android": {
       "adaptiveIcon": {
