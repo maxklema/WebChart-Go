@@ -7,8 +7,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
+
+import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
-import sendMessage from "./Messaging/sendMessage";
+import patientCallText from "./Patient Messaging/patientCallText";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
@@ -68,7 +70,13 @@ const WebViewScreen = () => {
                 getContacts(patID);
                 break;
             case 'sendMessage':
-                sendMessage(patID)
+                patientCallText(patID, 'Text');
+                break;
+            case 'makeCall':
+                patientCallText(patID, 'Call');
+                break;
+            case 'sendEmail':
+                sendEmail(patID);
                 break;
             default:
                 const data = JSON.parse(event.nativeEvent.data);
@@ -83,6 +91,7 @@ const WebViewScreen = () => {
                 console.log('----------------------');
                 console.log(mie.User_PatID.value);
                 console.log(mie.Cookie.value);
+                break;
         }
         
     }
