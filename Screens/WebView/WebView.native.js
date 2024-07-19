@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
+import * as FileSystem from 'expo-file-system';
 
 import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
@@ -84,6 +85,30 @@ const WebViewScreen = () => {
                 mie.Cookie.value = data.Cookie;
                 await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
     
+                //Store Cookie and Practice in JSON
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                const sessionInfo = await FileSystem.getInfoAsync(sessionURI);
+                
+                //if there is no sessionData file
+                if (!sessionInfo.exists) {
+                    const initialContent = JSON.stringify({"session_id": "", "wc_handle": ""});
+                    await FileSystem.writeAsStringAsync(sessionURI, initialContent)
+                }
+
+                let sessionData = await FileSystem.readAsStringAsync(sessionURI);
+                sessionData = JSON.parse(sessionData);
+
+                //update session information
+                sessionData["session_id"] = mie.Cookie.value;
+                sessionData["wc_handle"] = mie.practice.value;
+                sessionData["wc_URL"] = mie.URL.value;''
+
+                //write updated data
+                await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+
+
+
+
                 let JSON_data;
                 JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
                 mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, ActivityIndicator, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const InteractionCell = ({data}) => {
 
@@ -46,15 +47,19 @@ const InteractionCell = ({data}) => {
     } else {
         return (
             <View>
-                <View style={styles.DataContainer}>
+                <TouchableOpacity 
+                    activeOpacity={0.7} 
+                    onPress={() => {}} 
+                    style={styles.DataContainer}
+                >
                     <View style={styles.contact_type}>
                         <Ionicons name={contactIcon} size={21} color='#D65B27'></Ionicons> 
                     </View>
                     <View style={styles.DataValue}>
                         <Text style={styles.date} numberOfLines={1} ellipsizeMode="end">{interaction["Date"]}</Text>
-                    <Text numberOfLines={1} ellipsizeMode="end">{interaction["Patient Name"]} — {interaction["Contact Handle"]}</Text>
-                </View>
-                </View>
+                        <Text numberOfLines={1} ellipsizeMode="end">{interaction["Patient Name"]} — {interaction["Contact Handle"]}</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
             
         )
