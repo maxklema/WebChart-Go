@@ -1,5 +1,6 @@
 import mie from '@maxklema/mie-api-tools';
 import * as FileSystem from 'expo-file-system';
+import { format } from 'date-fns';
 
 const createInteraction = async (type, patID, contactHandle, patName) => {
 
@@ -30,7 +31,7 @@ const createInteraction = async (type, patID, contactHandle, patName) => {
             "Pat_ID": patID,
             "Contact Handle": contactHandle,
             "Patient Name": patName,
-            "Date": date
+            "Date": format(date, "MM/dd/yyyy hh:mm:ss a")
         }
 
         //write new data

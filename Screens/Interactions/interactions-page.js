@@ -5,6 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import mie from '@maxklema/mie-api-tools';
 import { StyleSheet, View } from "react-native";
 import Container from "../../Components/Container";
+import DataCell from "../../Components/DataCell";
 
 const InteractionsPage = () => {
 
@@ -14,38 +15,37 @@ const InteractionsPage = () => {
     useFocusEffect(
         React.useCallback(() => {
             const readInteractionsData = async () => {
-                    try {
-                        const fileUri = FileSystem.documentDirectory + "interactions.json";
+                try {
+                    const fileUri = FileSystem.documentDirectory + "interactions.json";
 
-                        const fileInfo = await FileSystem.getInfoAsync(fileUri);
-                            if (!fileInfo.exists) {
-                            const initialContent = JSON.stringify({ });
-                            await FileSystem.writeAsStringAsync(fileUri, initialContent);
-                        } else {
-                            let interactionsData = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
-                            interactionsData = interactionsData[mie.practice.value];
-                            // console.log(mie.practice.value);
-                            // console.log(JSON.stringify(interactionsData));
-
-                            // add file contents to state varaible
-                            let interactions = [];
-                            for (const interaction in interactionsData){
-                                interactions.push(interactionsData[interaction]);
-                            }
-
-                            setRecentInteractions(interactions.reverse());
-                            console.log(recentInteractions);
-
-                        }
+                    const fileInfo = await FileSystem.getInfoAsync(fileUri);
+                        if (!fileInfo.exists) {
+                        const initialContent = JSON.stringify({ });
+                        await FileSystem.writeAsStringAsync(fileUri, initialContent);
+                    } else {
+                        let interactionsData = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
+                        parseInteractions(interactionsData);
+                    }
                 } catch (error) {
                     console.error('Error handling interactions file:', error);
                 }
             };
-
         readInteractionsData();
 
-        }, [])
+        }, [mie.practice.value])
     );
+
+    const parseInteractions = (interactionsData) => {
+        interactionsData = interactionsData[mie.practice.value];
+
+        // add file contents to state varaible
+        let interactions = [];
+        for (const interaction in interactionsData){
+            interactions.push(interactionsData[interaction]);
+        }
+
+        setRecentInteractions(interactions.reverse());
+    }
 
     const clearData = async () => {
         const fileUri = FileSystem.documentDirectory + "interactions.json";
@@ -61,6 +61,13 @@ const InteractionsPage = () => {
                 {/* Recent Interactions */}
                 <View style={styles.recent_interactions_container}>
                     <Text style={styles.header}>Recent Interactions</Text>
+                    { recentInteractions.length > 0 ? 
+                        <View>
+                            { recentInteractions?.map((interaction, index) => (
+                                <DataCell key={index} deleteMethod={clearData} data={JSON.stringify(interaction)} type="interactions"/>
+                            ))}
+                        </View>
+                    : <></>}
                 </View>
 
                 <Button onPress={() => clearData()}>Clear Data</Button>
