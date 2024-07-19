@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  View,
+    StyleSheet, 
+    Text, 
+    TouchableOpacity, 
+    View,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -55,30 +55,16 @@ const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
     }
     return (
         <View>
-            { (data != "") ? 
+            { data != "" ? 
                 <View style={ styles.DataContainer}>
-                    { type == "interactions" ?
-                        <View style={styles.contact_type}>
-                            <Ionicons name={contactIcon} size={21} color='#D65B27'></Ionicons> 
-                        </View> :
-                        <></>
-                    }
                     <View style={[isSession && styles.DataValue, !isSession && styles.DataValueSy ]} >
                         { type == "contacts" ? 
                             <Text style={styles.handleText} numberOfLines={1} ellipsizeMode="end">{practice}</Text> :
-                            <>
-                                {type == "interactions" ? 
-                                    <Text style={styles.date} numberOfLines={1} ellipsizeMode="end">{interaction["Date"]}</Text> :
-                                <></> }
-                            </>
+                            <></>
                         }
                         { type == "contacts" ?
                             <Text numberOfLines={1} ellipsizeMode="end">{data['title'] != "" ? `${data['title']} ` : ""}{data['first_name']} {data['last_name']} {data['suffix']} - {data['contact_id']}</Text> :
-                            <>
-                                { type == "interactions" ? 
-                                    <Text numberOfLines={1} ellipsizeMode="end">{interaction["Patient Name"]} — {interaction["Contact Handle"]}</Text> : 
-                                    <Text numberOfLines={1} ellipsizeMode="end">{data}</Text> }
-                            </>
+                            <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
                         }
                     </View>
                     { type == "system" ?
@@ -90,17 +76,11 @@ const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
                                 <Ionicons name="open-outline" size={21} color='#1992d4'></Ionicons>
                             </TouchableOpacity>
                         </View>  :
-                        <>
-                            { type != "interactions" ? 
-                                <View style={ styles.DeleteDataValue }>
-                                    <TouchableOpacity onPress={() => deleteMethod(type, data)}>
-                                        <Ionicons name="trash-outline" size={21} color='red'></Ionicons>
-                                    </TouchableOpacity>
-                                </View>
-                                : <></>
-                            }
-                        </>
-                        
+                        <View style={ styles.DeleteDataValue }>
+                            <TouchableOpacity onPress={() => deleteMethod(type, data)}>
+                                <Ionicons name="trash-outline" size={21} color='red'></Ionicons>
+                            </TouchableOpacity>
+                        </View>
                     }
                 </View> :
                 <View style={styles.noData}>
@@ -160,9 +140,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         marginBottom: '1%'
     },
-    contact_type: {
-        marginRight: '5%' 
-    }
 })
 
 export default DataCell;

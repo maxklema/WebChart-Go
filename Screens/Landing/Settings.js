@@ -161,7 +161,7 @@ const Settings = ({navigation}) => {
                         <Text style={styles.headerSy}>Systems Data</Text>
                         { storedSystems.length > 1 ? 
                             <InputButton onPress={deleteSystems} text="Remove All" textStyle={ styles.removeAllButtonText} style={styles.removeAllButton}></InputButton> :
-                            <View />
+                            <></>
                         }
                     </View>
                     { storedSystems.length > 0 ?
@@ -229,7 +229,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignContent: 'center',
         flexDirection: 'row',
-        
     },
     removeAllButton: {
         backgroundColor: 'transparent',
