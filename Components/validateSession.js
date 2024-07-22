@@ -14,8 +14,10 @@ const ValidateSession = ({children, clearData, header, data}) => {
     const [key, SetKey] = useState(0); //used to re-render webView on load.
     const [isLoading, setIsLoading] = useState(true);
     const [isLocked, setIsLocked] = useState(true);
-    const webViewRef = useRef(null);
+    const [isSession, setIsSession] = useState(false);
     const [storedSession, setStoredSession] = useState('');
+    const webViewRef = useRef(null);
+    
 
     useFocusEffect(
         React.useCallback(() => {
@@ -25,11 +27,16 @@ const ValidateSession = ({children, clearData, header, data}) => {
                     SetKey(previous => previous + 1);
                     setIsLoading(true);
                     setIsLocked(true);
+                    setIsSession(false);
 
                     // Load Session Data
                     const sessionURI = FileSystem.documentDirectory + "session.json";
                     let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
-                    setStoredSession(sessionData['session_id']);
+                    setStoredSession(sessionData["session_id"]);
+
+                    if (sessionData["wc_URL"] != "")
+                        setIsSession(true);
+
                 } catch (error) {
                     console.error('Error handling interactions file:', error);
                 }
@@ -62,8 +69,10 @@ const ValidateSession = ({children, clearData, header, data}) => {
                     <InputButton onPress={clearData} text="Remove All" textStyle={ styles.removeAllButtonText} style={styles.removeAllButton}/>
                 : <></>}
             </View>
-            <Text>{mie.practice.value}</Text>
-            {isLoading ? 
+            <Text>
+                { mie.practice.value == "" ? "No Handle" : mie.practice.value}
+            </Text>
+            {isLoading && isSession ? 
         
                 <View style={[styles.widget, styles.loading_widget]}>
                     <ActivityIndicator />
@@ -71,31 +80,42 @@ const ValidateSession = ({children, clearData, header, data}) => {
                 </View> :
 
                 <>
-                {isLocked ? 
+                {isLocked && isSession ? 
 
                     <View style={styles.widget}>
                         <Ionicons style={styles.lock_icon} name="lock-closed-outline" size={21} color='#FFF'></Ionicons> 
                         <Text style={styles.left_widget_text}>This content is locked because your session is not valid. Please try logging in again.</Text>
                     </View> : 
                     <>
-                        {children}
+                        { isSession ? 
+                            <>{children}</> : 
+                            <View style={styles.widget}>
+                                <Ionicons style={styles.lock_icon} name="information-circle-outline" size={21} color='#FFF'></Ionicons> 
+                                <Text style={styles.left_widget_text}>You must add a WebChart System and log in to access this data.</Text>
+                            </View>
+                        }
                     </>
                 }
                 </>
             }
 
             {/* Hidden WebView for Valid Session purposes */}
-            <WebView
-                key={key} 
-                ref={webViewRef}
-                style={styles.webview}
-                onMessage={onMessage}
-                onNavigationStateChange={() => webViewRef.current.injectJavaScript(sessionCheck)}
-                source={{
-                    uri: "https://mieinternprac.webchartnow.com/webchart.cgi?",
-                    headers: headers
-                }}
-            />
+            { isSession ? 
+                <WebView
+                    key={key} 
+                    ref={webViewRef}
+                    style={styles.webview}
+                    sharedCookiesEnabled={true}
+                    onMessage={onMessage}
+                    onNavigationStateChange={() => webViewRef.current.injectJavaScript(sessionCheck)}
+                    source={{ 
+                        uri: mie.URL.value,
+                        headers: headers
+                    }}
+                /> : 
+                <></>
+            }
+            
         </View>
             
     );

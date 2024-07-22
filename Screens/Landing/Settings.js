@@ -53,7 +53,6 @@ const Settings = ({navigation}) => {
         switch(type) {
             case "session":
                 await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "session.json"), JSON.stringify({"session_id": "no session", "wc_handle": "", "wc_URL": ""}));           
-                setSessionData('');
                 break;
             case "system":
                 let systems = storedSystems.filter(function (url) { return url != data});
@@ -76,6 +75,15 @@ const Settings = ({navigation}) => {
     const openSystem = async(data) => {
         mie.practice.value = data.substring(8, data.indexOf('.'));
         mie.URL.value = data.substring(0,data.indexOf(".com")+4);
+
+        const sessionURI = FileSystem.documentDirectory + "session.json";
+        let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+
+        sessionData['wc_URL'] = mie.URL.value;
+        sessionData['wc_handle'] = mie.practice.value;
+
+        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+
         navigation.navigate('WebChart');
     }
 

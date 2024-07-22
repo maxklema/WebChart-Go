@@ -40,8 +40,8 @@ const UrlScreen = ({ navigation }) => {
               }
 
               navigation.navigate('WebChart');
+              
             }
-                
     
           }
           launchRecentSystem();

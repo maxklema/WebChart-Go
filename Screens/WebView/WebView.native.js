@@ -36,10 +36,10 @@ const WebViewScreen = () => {
             const getStoredCookie = async () => {
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
-
                 setSessionID(sessionData["session_id"]);
             }
             getStoredCookie();
+
         }, [])
     ) 
 
@@ -94,9 +94,9 @@ const WebViewScreen = () => {
                 let JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
                 mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
     
-                console.log('----------------------');
-                console.log(mie.User_PatID.value);
-                console.log(mie.Cookie.value);
+                // console.log('----------------------');
+                // console.log(mie.User_PatID.value);
+                // console.log(mie.Cookie.value);
                 break;
         }
         
@@ -135,7 +135,7 @@ const WebViewScreen = () => {
                     style={styles.webview} 
                     source={{ 
                         uri: mie.URL.value,
-                        headers: headers,
+                        headers: headers
                     }}
                     onNavigationStateChange={navStateChange} 
                     onMessage={onMessage}
