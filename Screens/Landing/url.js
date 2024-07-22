@@ -1,22 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { 
-  StyleSheet, 
-  Text, 
-  View,
-  SafeAreaView, 
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  StatusBar
-} from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Image, KeyboardAvoidingView, Platform, StatusBar } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
 import InputBox from '../../Components/inputBox';
 import InputButton from '../../Components/inputButton';
 import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
 import { SettingsContext } from '../Context/context';
+import * as FileSystem from 'expo-file-system';
 
 const UrlScreen = ({ navigation }) => {
 
@@ -36,12 +27,12 @@ const UrlScreen = ({ navigation }) => {
         if (isToggled.automatic_wc_launch){
           async function launchRecentSystem () {
   
-              const user_systems = await AsyncStorage.getItem('wc-system-urls');
+            const systemsURI = FileSystem.documentDirectory + "systems.JSON";            
+            const user_systems = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
   
               if (user_systems) {
-                  const parsed_US = JSON.parse(user_systems);
-                  if (parsed_US.system_URLS.length > 0){
-                    const recentWC = parsed_US.system_URLS[0];
+                  if (user_systems.system_URLS.length > 0){
+                    const recentWC = user_systems.system_URLS[0];
                     mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
                     if (!recentWC.includes("/webchart.cgi")) {
                       mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
@@ -71,24 +62,19 @@ const UrlScreen = ({ navigation }) => {
             setOnload(true);
           }
 
-          async function setSystemsData() {
-          
-            const user_systems = await AsyncStorage.getItem('wc-system-urls');
+          const setSystemsData = async () => {
+            
+            // Get Recent WC Systems JSON Data
+            const systemsURI = FileSystem.documentDirectory + "systems.JSON";            
+            const systemsInfo = await FileSystem.getInfoAsync(systemsURI);
 
-            //await AsyncStorage.removeItem('wc-system-urls');
-            if (!user_systems){
-              let WC_Systems = {
-                name: "WC_Systems",
-                system_URLS: []
-              };
-              setStoredSystems[WC_Systems.system_URLS];
-              await AsyncStorage.setItem("wc-system-urls", JSON.stringify(WC_Systems));
-            } else {
-              const parsed_us = JSON.parse(user_systems);
-              setStoredSystems(parsed_us.system_URLS);
-
+            if (!systemsInfo.exists){
+              const initialContent = JSON.stringify({ name: "WC_Systems", system_URLS: [] });
+              await FileSystem.writeAsStringAsync(systemsURI, initialContent);
             }
             
+            const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
+            setStoredSystems(systemsData.system_URLS);    
           }
 
           setSystemsData(); 
@@ -154,20 +140,21 @@ const UrlScreen = ({ navigation }) => {
             mie.URL.value = URL;
           }
 
-          const user_Systems = JSON.parse(await AsyncStorage.getItem('wc-system-urls'));
-          const user_Systems_URLS = user_Systems.system_URLS;
+          const systemsURI = FileSystem.documentDirectory + "systems.JSON";
+          const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
+          const user_Systems_URLS = systemsData['system_URLS'];
 
           //check if URL is already stored
           if (!user_Systems_URLS.includes(mie.URL.value)) {
             user_Systems_URLS.unshift(mie.URL.value);
-            user_Systems.system_URLS = user_Systems_URLS;
-            await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+            systemsData.system_URLS = user_Systems_URLS;
+            await FileSystem.writeAsStringAsync(systemsURI, JSON.stringify(systemsData));
           } else { 
             //set URL to the front of the list
             user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
             user_Systems_URLS.unshift(mie.URL.value);
-            user_Systems.system_URLS = user_Systems_URLS;
-          await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_Systems)); 
+            systemsData.system_URLS = user_Systems_URLS;
+            await FileSystem.writeAsStringAsync(systemsURI, JSON.stringify(systemsData));
           }
           
           onChangeText('');

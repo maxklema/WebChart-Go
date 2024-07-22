@@ -39,7 +39,7 @@ const ValidateSession = ({children, clearData, header, data}) => {
                     let sessionData = await FileSystem.readAsStringAsync(sessionURI);
                     sessionData = JSON.parse(sessionData);
 
-                    console.log(sessionData['wc_handle'], sessionData['session_id'], sessionData["wc_URL"]);
+                    console.log("ACTUAL SESSION TOKEN: " + sessionData['session_id']);
 
                     setStoredSession(sessionData['session_id']);
                 
@@ -53,13 +53,16 @@ const ValidateSession = ({children, clearData, header, data}) => {
     );
 
     const headers = {
-        'cookie': `wc_miehr_${mie.practice.value}_session_id=${storedSession}`
+        'cookie': `wc_miehr_${mie.practice.value}_session_id=${mie.Cookie.value}`
     }
 
     //check if returned cookie matches saved cookie
     const onMessage = async (event) => {
         const message = event.nativeEvent.data;
             
+        console.log("EXPECTED SESSION TOKEN: " + message);
+        console.log("-------------------------")
+
         if (message == storedSession)
             setIsLocked(false);
 
@@ -101,6 +104,7 @@ const ValidateSession = ({children, clearData, header, data}) => {
             <WebView
                 key={key} 
                 ref={webViewRef}
+                style={styles.webview}
                 onMessage={onMessage}
                 onNavigationStateChange={() => webViewRef.current.injectJavaScript(sessionCheck)}
                 source={{
@@ -122,6 +126,9 @@ const styles = StyleSheet.create({
         color: 'rgb(50,50,50)',
         marginTop: '2%'
     },
+    // webview: {
+    //     height: 300,
+    // }, 
     recent_interactions_header: {
         display: 'flex',
         alignItems: 'center',

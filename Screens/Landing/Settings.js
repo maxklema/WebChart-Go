@@ -6,9 +6,9 @@ import mie from '@maxklema/mie-api-tools';
 import InputButton from '../../Components/inputButton';
 import DataCell from '../../Components/Cells/dataCell';
 import { SettingsContext } from '../Context/context';
-import * as Contacts from 'expo-contacts';
 import Container from '../../Components/Container';
 import ContactsWidget from './Contact Component/Contacts';
+import * as FileSystem from 'expo-file-system';
 
 const Settings = ({navigation}) => {
 
@@ -28,16 +28,29 @@ const Settings = ({navigation}) => {
     useFocusEffect(
         React.useCallback(() => {
             const getSessionInformation = async () => {
-                const session_ID = await AsyncStorage.getItem('mie_session_id');
-                const user_systems = await AsyncStorage.getItem('wc-system-urls');
-                if (session_ID != '' && session_ID != null)
-                    setSessionData(session_ID);
-                if (user_systems) {
-                    const parsed_us = JSON.parse(user_systems);
-                    setStoredSystems(parsed_us.system_URLS);
-                }
+                
+                //session ID
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+                
+                if (sessionData['session_id'] != '' && sessionData['session_id'] != null)
+                    setSessionData(sessionData['session_id']);
 
-                setUserSystemsRaw(JSON.parse(user_systems));
+                // Systems URLs
+                const systemsURI = FileSystem.documentDirectory + "systems.JSON";            
+                const systemsInfo = await FileSystem.getInfoAsync(systemsURI);
+
+                if (!systemsInfo.exists){
+                    const initialContent = JSON.stringify({ name: "WC_Systems", system_URLS: [] });
+                    await FileSystem.writeAsStringAsync(systemsURI, initialContent);
+                }
+                
+                const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
+
+                if (systemsData)
+                    setStoredSystems(systemsData.system_URLS);
+    
+                setUserSystemsRaw(systemsData);
             }
             getSessionInformation();
         }, [])
@@ -46,7 +59,7 @@ const Settings = ({navigation}) => {
     const deleteData = async (type, data) => {
         switch(type) {
             case "session":
-                await AsyncStorage.removeItem('mie_session_id');           
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "session.json"), JSON.stringify({"session_id": "", "wc_handle": "", "wc_URL": ""}));           
                 setSessionData('');
                 break;
             case "system":
@@ -54,7 +67,7 @@ const Settings = ({navigation}) => {
                 setStoredSystems(systems);
                 let user_systems_whole = userSystemsRaw;
                 user_systems_whole.system_URLS = systems;
-                await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_systems_whole));
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.JSON"), JSON.stringify(user_systems_whole));
                 break;
         }
     
@@ -64,8 +77,7 @@ const Settings = ({navigation}) => {
         let user_systems_whole = userSystemsRaw;
         user_systems_whole.system_URLS = []
         setStoredSystems(user_systems_whole.system_URLS);
-        await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_systems_whole));
-        
+        await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.JSON"), JSON.stringify(user_systems_whole));        
     }
 
     const openSystem = async(data) => {

@@ -1,7 +1,6 @@
 import React, { useRef, useState, useContext, useEffect } from "react";
 import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Linking} from "react-native";
 import { WebView } from "react-native-webview";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import mie from '@maxklema/mie-api-tools';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -23,7 +22,7 @@ const WebViewScreen = () => {
     
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
-    const {isToggled, setIsToggled} = useContext(SettingsContext);
+    const { isToggled } = useContext(SettingsContext);
     const [patID, setPatID] = useState(null);
 
     //back and forth buttons
@@ -34,13 +33,19 @@ const WebViewScreen = () => {
     useFocusEffect(
         React.useCallback(() => {
 
-            //AsyncStorage.removeItem('mie_session_id');
-            async function getStoredCookie() {
-                const mieSession = await AsyncStorage.getItem('mie_session_id');
-                if (!mieSession){
-                    await AsyncStorage.setItem('mie_session_id', '');
+            const getStoredCookie = async () => {
+
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                const sessionInfo = await FileSystem.getInfoAsync(sessionURI);
+                
+                if (!sessionInfo.exists) {
+                    const initialContent = JSON.stringify({"session_id": "", "wc_handle": "", "wc_URL": ""});
+                    await FileSystem.writeAsStringAsync(sessionURI, initialContent)
                 }
-                setSessionID(mieSession);
+
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+
+                setSessionID(sessionData["session_id"]);
             }
             getStoredCookie();
         }, [])
@@ -83,34 +88,18 @@ const WebViewScreen = () => {
                 const data = JSON.parse(event.nativeEvent.data);
                 console.log(data.Cookie);
                 mie.Cookie.value = data.Cookie;
-                await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
     
                 //Store Cookie and Practice in JSON
                 const sessionURI = FileSystem.documentDirectory + "session.json";
-                const sessionInfo = await FileSystem.getInfoAsync(sessionURI);
-                
-                //if there is no sessionData file
-                if (!sessionInfo.exists) {
-                    const initialContent = JSON.stringify({"session_id": "", "wc_handle": ""});
-                    await FileSystem.writeAsStringAsync(sessionURI, initialContent)
-                }
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
 
-                let sessionData = await FileSystem.readAsStringAsync(sessionURI);
-                sessionData = JSON.parse(sessionData);
-
-                //update session information
                 sessionData["session_id"] = mie.Cookie.value;
                 sessionData["wc_handle"] = mie.practice.value;
-                sessionData["wc_URL"] = mie.URL.value;''
+                sessionData["wc_URL"] = mie.URL.value;
 
-                //write updated data
                 await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
 
-
-
-
-                let JSON_data;
-                JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
+                let JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
                 mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
     
                 console.log('----------------------');
