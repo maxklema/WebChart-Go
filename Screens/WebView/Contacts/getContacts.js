@@ -34,7 +34,7 @@ const getContacts = (patID) => {
                     let patientContactData = await FileSystem.readAsStringAsync(contactURI);
                     patientContactData = JSON.parse(patientContactData); //contacts JSON parsed.
 
-                    patientContactData[`${patID}`] = patientData;
+                    patientContactData[mie.practice.value][`${patID}`] = patientData;
 
                     await FileSystem.writeAsStringAsync(contactURI, JSON.stringify(patientContactData));
                 }
@@ -52,7 +52,10 @@ const getContacts = (patID) => {
                 let contactData = await FileSystem.readAsStringAsync(contactURI);
                 contactData = JSON.parse(contactData); //contacts JSON parsed.
 
-                if (!contactData[`${patID}`]){
+                if (!contactData[mie.practice.value])
+                    contactData[mie.practice.value] = {};
+
+                if (!contactData[mie.practice.value][`${patID}`]){
 
                     let patInfo = await getPatientInfo(patID);
                     const contactId = await formatContacts(patInfo, '');
@@ -66,7 +69,7 @@ const getContacts = (patID) => {
                         'wc_handle': mie.practice.value
                     }
                     
-                    contactData[`${patID}`] = patientData;
+                    contactData[mie.practice.value][`${patID}`] = patientData;
                     await FileSystem.writeAsStringAsync(contactURI, JSON.stringify(contactData));
                 
                     Alert.alert('Success', (patInfo[0]["suffix"] == "" ? `${patInfo[0]["title"]} ${patInfo[0]["first_name"]} ${patInfo[0]["last_name"]} added to contacts.` : `${patInfo[0]["title"]} ${patInfo[0]["first_name"]} ${patInfo[0]["last_name"]}  ${patInfo[0]["suffix"]} added to contacts.`), [
@@ -79,7 +82,7 @@ const getContacts = (patID) => {
                     Alert.alert('Contact Found', "This patient already has a contact on your device. Would you like to update their contact?", [
                         {
                             text: 'Update',
-                            onPress: () => {updateContact(contactData[`${patID}`]['contact_id']);}
+                            onPress: () => {updateContact(contactData[mie.practice.value][`${patID}`]['contact_id']);}
                         },
                         {
                             text: 'Cancel',

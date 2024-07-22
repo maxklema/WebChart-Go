@@ -5,11 +5,13 @@ import * as Contacts from 'expo-contacts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as FileSystem from 'expo-file-system';
 import ContactCell from '../../../Components/Cells/contactCell';
+import ValidateSession from '../../../Components/validateSession';
+import mie from '@maxklema/mie-api-tools';
 
 const ContactsWidget = () => {
 
     const [userContacts, setUserContacts] = useState([]);
-
+    
     useFocusEffect(
         React.useCallback(() => {
             const getContacts = async () => {
@@ -35,8 +37,8 @@ const ContactsWidget = () => {
     const parseContacts = (user_contacts) => {
         const parsed_contacts = JSON.parse(user_contacts);
         let contacts = []
-        for (const contact in parsed_contacts){
-            contacts.push(parsed_contacts[contact]);
+        for (const contact in parsed_contacts[mie.practice.value]){
+            contacts.push(parsed_contacts[mie.practice.value][contact]);
         }
         setUserContacts(contacts);
     }
@@ -49,9 +51,9 @@ const ContactsWidget = () => {
         const contactURI = FileSystem.documentDirectory + "contacts.json";
         let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
     
-        for (let key in contactData){
-            if (contactData[key]["contact_id"] == contact_id) {
-                delete contactData[key];
+        for (let key in contactData[mie.practice.value]){
+            if (contactData[mie.practice.value][key]["contact_id"] == contact_id) {
+                delete contactData[mie.practice.value][key];
                 await FileSystem.writeAsStringAsync(contactURI, JSON.stringify(contactData));
                 break;
             }
@@ -61,28 +63,40 @@ const ContactsWidget = () => {
         
     };
 
+    const clearAllContacts = async () => {
+        const contactURI = FileSystem.documentDirectory + "contacts.json";
+        let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
+        
+        for (let contact in contactData[mie.practice.value]){
+            try { await Contacts.removeContactAsync(contactData[mie.practice.value][contact]["contact_id"]); } catch {}
+            delete contactData[mie.practice.value][contact];
+        }
+                
+        await FileSystem.writeAsStringAsync(contactURI, JSON.stringify(contactData));
+        setUserContacts([]);
+    }
+
     return (
         
         <View style={styles.contacts_container}>
-            <Text style={styles.header}>Contacts</Text>
-            <>
-            { userContacts.length > 0 ? 
-                <>
-                    <View style={styles.contact_warning}>
-                        <Ionicons name="alert-circle-outline" size={21} color='white'></Ionicons>
-                        <Text style={styles.contact_warning_text }>Deleting a contact will remove it from your local storage and your device's contacts.</Text>
+            <ValidateSession data={userContacts} header={"Contacts"} clearData={clearAllContacts}>
+                { userContacts.length > 0 ? 
+                    <>
+                        <View style={styles.contact_warning}>
+                            <Ionicons name="alert-circle-outline" size={21} color='white'></Ionicons>
+                            <Text style={styles.contact_warning_text }>Deleting a contact will remove it from your local storage and your device's contacts.</Text>
+                        </View>
+                        <View>
+                            { userContacts?.map((contact, index) => (
+                                <ContactCell deleteMethod={deleteContact} key={index} data={contact} practice={contact['wc_handle']}/>
+                            ))}
+                        </View>
+                    </> :
+                    <View style={styles.noData}>
+                        <Text>No stored contacts. Contacts of users will appear here when you add them to your device's contacts from your WebChart system.</Text>
                     </View>
-                    <View>
-                        { userContacts?.map((contact, index) => (
-                            <ContactCell deleteMethod={deleteContact} key={index} data={contact} practice={contact['wc_handle']}/>
-                        ))}
-                    </View>
-                </> :
-                <View style={styles.noData}>
-                    <Text>No stored contacts. Contacts of users will appear here when you add them to your device's contacts from your WebChart system.</Text>
-                </View>
-            }
-            </>
+                }
+            </ValidateSession>
         </View>
     );
 
