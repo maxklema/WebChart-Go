@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button, Text } from "react-native-paper";
+import React, { useState, useRef } from "react";
+import { Text } from "react-native-paper";
 import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from "@react-navigation/native";
 import mie from '@maxklema/mie-api-tools';
 import { StyleSheet, View, ActivityIndicator } from "react-native";
 import Container from "../../Components/Container";
 import InputButton from "../../Components/inputButton";
-import InteractionCell from "../../Components/interactionCell";
+import InteractionCell from "../../Components/Cells/interactionCell";
 import WebView from "react-native-webview";
 import { sessionCheck } from "../WebView/WebView HTML Injection/sessionCheck";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -109,32 +109,41 @@ const InteractionsPage = () => {
                 <View>
                     <View style={styles.recent_interactions_header}>
                         <Text style={styles.headerInteractions}>Recent Interactions</Text>
-                        { recentInteractions.length > 0 && !isLoading ?
+                        { recentInteractions.length > 0 && !isLocked ?
                             <InputButton onPress={clearData} text="Remove All" textStyle={ styles.removeAllButtonText} style={styles.removeAllButton}/>
                         : <></>}
                     </View>
                     <Text>{mie.practice.value}</Text>
-                    {isLocked ? 
+                    {isLoading ? 
 
-                        <View style={styles.locked}>
-                            <Ionicons style={styles.lock_icon} name="lock-closed-outline" size={21} color='#FFF'></Ionicons> 
-                            <Text style={styles.locked_text}>This content is locked because your session is not valid. Please try logging in again.</Text>
-                        </View>
-                        
-                    : 
-                    <>
-                        { recentInteractions.length > 0 ? 
-                            <View>
-                                { recentInteractions?.map((interaction, index) => (
-                                    <InteractionCell key={index} data={JSON.stringify(interaction)}/>
-                                ))}
-                            </View> :
-                            <View style={styles.noData}>
-                                <Text>You have no recent patient interactions. An interaction will appear when you contact a patient (SMS, Email, Call) through their WebChart.</Text>
-                            </View> 
+                        <View style={[styles.widget, styles.loading_widget]}>
+                            <ActivityIndicator />
+                            <Text style={[styles.left_widget_text, styles.loading_text]}>Validating Session</Text>
+                        </View> :
+
+                        <>
+                        {isLocked ? 
+
+                            <View style={styles.widget}>
+                                <Ionicons style={styles.lock_icon} name="lock-closed-outline" size={21} color='#FFF'></Ionicons> 
+                                <Text style={styles.left_widget_text}>This content is locked because your session is not valid. Please try logging in again.</Text>
+                            </View> : 
+                            <>
+                                { recentInteractions.length > 0 ? 
+                                    <View>
+                                        { recentInteractions?.map((interaction, index) => (
+                                            <InteractionCell key={index} data={JSON.stringify(interaction)}/>
+                                        ))}
+                                    </View> :
+                                    <View style={styles.noData}>
+                                        <Text>You have no recent patient interactions. An interaction will appear when you contact a patient (SMS, Email, Call) through their WebChart.</Text>
+                                    </View> 
+                                }
+                            </>
                         }
-                    </>
+                        </>
                     }
+                    
                     
                 </View>
 
@@ -205,8 +214,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         padding: 10,
     },
-    locked: {
-        marginTop: '2%',
+    widget: {
+        marginTop: '3%',
         paddingHorizontal: '6.5%',
         paddingVertical: '2.5%',
         backgroundColor: '#278dd6',
@@ -216,15 +225,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center'
     },
-    // lock_icon: {
-    //     marginRight: '3%'
-    // },
-    locked_text: {
+    left_widget_text: {
         textAlign: 'left',
-        color: 'white',
+        color: '#fff',
         marginLeft: '3%',
         width: '95%'
     },
+    loading_widget: {
+        backgroundColor: 'rgb(240, 240, 240)',
+    },
+    loading_text: {
+        color: '#000'
+    }
 })
 
 export default InteractionsPage;

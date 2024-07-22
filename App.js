@@ -8,7 +8,7 @@ import UrlScreen from './Screens/Landing/url';
 import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
 import { SettingsProvider } from './Screens/Context/context';
-
+import interactionsPage from './Screens/Interactions/interactions-page';
 // Create the Stack Navigator
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -27,6 +27,9 @@ const Tab = createBottomTabNavigator();
                 case('Settings'):
                   iconName = focused ? 'settings' : 'settings-outline';
                   break;
+                case('Interactions'):
+                  iconName = focused ? 'people' : 'people-outline';
+                  break;
               }
 
               return <Ionicons name={iconName} size={size} color={color}/>
@@ -36,6 +39,10 @@ const Tab = createBottomTabNavigator();
             <Tab.Screen
                 name="Enter URL"
                 component={UrlScreen}
+            />
+            <Tab.Screen
+                name="Interactions"
+                component={interactionsPage}
             />
             <Tab.Screen
                 name="Settings"

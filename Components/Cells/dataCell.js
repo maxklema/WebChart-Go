@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { 
     StyleSheet, 
     Text, 
@@ -8,20 +8,12 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 
-const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
+const DataCell = ({data, type, deleteMethod, openMethod}) => {
 
     const [isSession, setIsSession] = useState(true);    
-    const [interaction, setInteraction] = useState({});
-    const [contactIcon, setContactIcon] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
 
     useFocusEffect(
         React.useCallback(() => {
-            
-            if (type == 'interactions') {
-                setInteraction(JSON.parse(data));
-                setInteractionIcon(interaction["type"]);
-            }
             
             if (type == 'system')
                 setIsSession(false);
@@ -29,43 +21,12 @@ const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
         }, [])
     )
 
-    useEffect(() => {
-        if (interaction) {
-            setInteractionIcon(interaction["type"]);
-            setIsLoading(false);
-        }
-    }, [interaction]);
-
-    const setInteractionIcon = (type) => {
-        switch(type) {
-            case "Email":
-                setContactIcon("mail-outline");
-                break;
-            case "SMS":
-                setContactIcon("chatbubble-outline");
-                break;
-            case "CALL":
-                setContactIcon("call-outline");
-                break;
-        }
-    }
-
-    if (isLoading) {
-        return <Text>Loading...</Text>
-    }
     return (
         <View>
             { data != "" ? 
                 <View style={ styles.DataContainer}>
                     <View style={[isSession && styles.DataValue, !isSession && styles.DataValueSy ]} >
-                        { type == "contacts" ? 
-                            <Text style={styles.handleText} numberOfLines={1} ellipsizeMode="end">{practice}</Text> :
-                            <></>
-                        }
-                        { type == "contacts" ?
-                            <Text numberOfLines={1} ellipsizeMode="end">{data['title'] != "" ? `${data['title']} ` : ""}{data['first_name']} {data['last_name']} {data['suffix']} - {data['contact_id']}</Text> :
-                            <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
-                        }
+                        <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
                     </View>
                     { type == "system" ?
                         <View style={ styles.DeleteDataValueSy }>
