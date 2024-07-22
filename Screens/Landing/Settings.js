@@ -37,14 +37,7 @@ const Settings = ({navigation}) => {
                     setSessionData(sessionData['session_id']);
 
                 // Systems URLs
-                const systemsURI = FileSystem.documentDirectory + "systems.JSON";            
-                const systemsInfo = await FileSystem.getInfoAsync(systemsURI);
-
-                if (!systemsInfo.exists){
-                    const initialContent = JSON.stringify({ name: "WC_Systems", system_URLS: [] });
-                    await FileSystem.writeAsStringAsync(systemsURI, initialContent);
-                }
-                
+                const systemsURI = FileSystem.documentDirectory + "systems.json";            
                 const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
 
                 if (systemsData)
@@ -59,7 +52,7 @@ const Settings = ({navigation}) => {
     const deleteData = async (type, data) => {
         switch(type) {
             case "session":
-                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "session.json"), JSON.stringify({"session_id": "", "wc_handle": "", "wc_URL": ""}));           
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "session.json"), JSON.stringify({"session_id": "no session", "wc_handle": "", "wc_URL": ""}));           
                 setSessionData('');
                 break;
             case "system":
@@ -67,7 +60,7 @@ const Settings = ({navigation}) => {
                 setStoredSystems(systems);
                 let user_systems_whole = userSystemsRaw;
                 user_systems_whole.system_URLS = systems;
-                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.JSON"), JSON.stringify(user_systems_whole));
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));
                 break;
         }
     
@@ -77,7 +70,7 @@ const Settings = ({navigation}) => {
         let user_systems_whole = userSystemsRaw;
         user_systems_whole.system_URLS = []
         setStoredSystems(user_systems_whole.system_URLS);
-        await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.JSON"), JSON.stringify(user_systems_whole));        
+        await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));        
     }
 
     const openSystem = async(data) => {

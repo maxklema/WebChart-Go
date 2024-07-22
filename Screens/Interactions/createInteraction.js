@@ -4,18 +4,8 @@ import { format } from 'date-fns';
 
 const createInteraction = async (type, patID, contactHandle, patName) => {
 
-        //check to see if interactions.JSON exists
-        const interactionsURI = FileSystem.documentDirectory + "interactions.json";
-        const interactionsInfo = await FileSystem.getInfoAsync(interactionsURI);
-
-        //create new file if one does not exist
-        if (!interactionsInfo.exists) {
-            const initialContent = JSON.stringify({});
-            await FileSystem.writeAsStringAsync(interactionsURI, initialContent);
-        }
-        
-        let interactionsData = await FileSystem.readAsStringAsync(interactionsURI);
-        interactionsData = JSON.parse(interactionsData);
+        const interactionsURI = FileSystem.documentDirectory + "interactions.json";        
+        let interactionsData = JSON.parse(await FileSystem.readAsStringAsync(interactionsURI));
 
         //check if handle exists
         if (!interactionsData[mie.practice.value])

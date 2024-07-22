@@ -34,15 +34,7 @@ const WebViewScreen = () => {
         React.useCallback(() => {
 
             const getStoredCookie = async () => {
-
                 const sessionURI = FileSystem.documentDirectory + "session.json";
-                const sessionInfo = await FileSystem.getInfoAsync(sessionURI);
-                
-                if (!sessionInfo.exists) {
-                    const initialContent = JSON.stringify({"session_id": "", "wc_handle": "", "wc_URL": ""});
-                    await FileSystem.writeAsStringAsync(sessionURI, initialContent)
-                }
-
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
 
                 setSessionID(sessionData["session_id"]);

@@ -18,15 +18,8 @@ const InteractionsPage = () => {
         
                 // Load Interactions Data
                 const fileUri = FileSystem.documentDirectory + "interactions.json";
-
-                const fileInfo = await FileSystem.getInfoAsync(fileUri);
-                if (!fileInfo.exists) {
-                    const initialContent = JSON.stringify({ });
-                    await FileSystem.writeAsStringAsync(fileUri, initialContent);
-                } else {
-                    let interactionsData = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
-                    parseInteractions(interactionsData);
-                }
+                let interactionsData = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
+                parseInteractions(interactionsData);
                 
             };
         readInteractionsData();

@@ -18,7 +18,7 @@ const UrlScreen = ({ navigation }) => {
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
 
-    const {isToggled, setIsToggled} = useContext(SettingsContext);
+    const { isToggled } = useContext(SettingsContext);
 
     useEffect( () => {
       
@@ -27,22 +27,22 @@ const UrlScreen = ({ navigation }) => {
         if (isToggled.automatic_wc_launch){
           async function launchRecentSystem () {
   
-            const systemsURI = FileSystem.documentDirectory + "systems.JSON";            
+            const systemsURI = FileSystem.documentDirectory + "systems.json";            
             const user_systems = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
-  
-              if (user_systems) {
-                  if (user_systems.system_URLS.length > 0){
-                    const recentWC = user_systems.system_URLS[0];
-                    mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
-                    if (!recentWC.includes("/webchart.cgi")) {
-                      mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
-                    } else {
-                      mie.URL.value = recentWC;
-                    }
-                    navigation.navigate('WebChart');
-                  }
-                
+
+            if (user_systems.system_URLS.length > 0){
+              const recentWC = user_systems.system_URLS[0];
+              mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
+              if (!recentWC.includes("/webchart.cgi")) {
+                mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
+              } else {
+                mie.URL.value = recentWC;
               }
+
+              navigation.navigate('WebChart');
+            }
+                
+    
           }
           launchRecentSystem();
         } 
@@ -63,22 +63,11 @@ const UrlScreen = ({ navigation }) => {
           }
 
           const setSystemsData = async () => {
-            
-            // Get Recent WC Systems JSON Data
-            const systemsURI = FileSystem.documentDirectory + "systems.JSON";            
-            const systemsInfo = await FileSystem.getInfoAsync(systemsURI);
-
-            if (!systemsInfo.exists){
-              const initialContent = JSON.stringify({ name: "WC_Systems", system_URLS: [] });
-              await FileSystem.writeAsStringAsync(systemsURI, initialContent);
-            }
-            
+            const systemsURI = FileSystem.documentDirectory + "systems.json";            
             const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
             setStoredSystems(systemsData.system_URLS);    
           }
-
           setSystemsData(); 
-          
       }, [])
     );
 
@@ -140,7 +129,7 @@ const UrlScreen = ({ navigation }) => {
             mie.URL.value = URL;
           }
 
-          const systemsURI = FileSystem.documentDirectory + "systems.JSON";
+          const systemsURI = FileSystem.documentDirectory + "systems.json";
           const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
           const user_Systems_URLS = systemsData['system_URLS'];
 

@@ -5,9 +5,7 @@ import mie from '@maxklema/mie-api-tools';
 import * as FileSystem from 'expo-file-system';
 
 const getPatientInfo = async (patID) => {
-        
     const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone", "work_phone" ]
-
     let patInfo = await mie.retrieveRecord("patients", fields, { pat_id: patID})
     return patInfo;
 }
@@ -42,15 +40,7 @@ const getContacts = (patID) => {
                 //add to JSON storage.
 
                 const contactURI = FileSystem.documentDirectory + "contacts.json";
-                const contactInfo = await FileSystem.getInfoAsync(contactURI); 
-
-                if (!contactInfo.exists) {
-                    const initialContent = JSON.stringify({ });
-                    await FileSystem.writeAsStringAsync(contactURI, initialContent)
-                }
-
-                let contactData = await FileSystem.readAsStringAsync(contactURI);
-                contactData = JSON.parse(contactData); //contacts JSON parsed.
+                let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
 
                 if (!contactData[mie.practice.value])
                     contactData[mie.practice.value] = {};

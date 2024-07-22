@@ -28,21 +28,8 @@ const ValidateSession = ({children, clearData, header, data}) => {
 
                     // Load Session Data
                     const sessionURI = FileSystem.documentDirectory + "session.json";
-                    const sessionInfo = await FileSystem.getInfoAsync(sessionURI); 
-
-                    //if there is no sessionData file
-                    if (!sessionInfo.exists) {
-                        const initialContent = JSON.stringify({"session_id": "", "wc_handle": ""});
-                        await FileSystem.writeAsStringAsync(sessionURI, initialContent)
-                    }
-
-                    let sessionData = await FileSystem.readAsStringAsync(sessionURI);
-                    sessionData = JSON.parse(sessionData);
-
-                    console.log("ACTUAL SESSION TOKEN: " + sessionData['session_id']);
-
+                    let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                     setStoredSession(sessionData['session_id']);
-                
                 } catch (error) {
                     console.error('Error handling interactions file:', error);
                 }
@@ -59,9 +46,6 @@ const ValidateSession = ({children, clearData, header, data}) => {
     //check if returned cookie matches saved cookie
     const onMessage = async (event) => {
         const message = event.nativeEvent.data;
-            
-        console.log("EXPECTED SESSION TOKEN: " + message);
-        console.log("-------------------------")
 
         if (message == storedSession)
             setIsLocked(false);

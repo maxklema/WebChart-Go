@@ -23,7 +23,7 @@ const DataCell = ({data, type, deleteMethod, openMethod}) => {
 
     return (
         <View>
-            { data != "" ? 
+            { (data != "" && data != "no session") ? 
                 <View style={ styles.DataContainer}>
                     <View style={[isSession && styles.DataValue, !isSession && styles.DataValueSy ]} >
                         <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
@@ -45,7 +45,7 @@ const DataCell = ({data, type, deleteMethod, openMethod}) => {
                     }
                 </View> :
                 <View style={styles.noData}>
-                    <Text>No session cookies present. A cookie will appear here when you successfully log in into a WebChart System.</Text>
+                    <Text>No session cookies present. A cookie will appear here when you successfully log in to a WebChart System.</Text>
                 </View>
                 
             }

@@ -18,13 +18,6 @@ const ContactsWidget = () => {
 
                 //display JSON contacts
                 const contactURI = FileSystem.documentDirectory + "contacts.json";
-                const contactInfo = await FileSystem.getInfoAsync(contactURI); 
-
-                if (!contactInfo.exists) {
-                    const initialContent = JSON.stringify({ });
-                    await FileSystem.writeAsStringAsync(contactURI, initialContent)
-                }
-
                 let contactData = await FileSystem.readAsStringAsync(contactURI);
                 parseContacts(contactData);
             }
@@ -93,7 +86,7 @@ const ContactsWidget = () => {
                         </View>
                     </> :
                     <View style={styles.noData}>
-                        <Text>No stored contacts. Contacts of users will appear here when you add them to your device's contacts from your WebChart system.</Text>
+                        <Text>You have no stored contacts. Contacts of users will appear here when you add them to your device's contacts from your WebChart system.</Text>
                     </View>
                 }
             </ValidateSession>
