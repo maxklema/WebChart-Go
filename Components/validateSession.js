@@ -34,13 +34,9 @@ const ValidateSession = ({children, clearData, header, data, sessionValid}) => {
                     let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                     setStoredSession(sessionData["session_id"]);
 
-                    // console.log(sessionData["wc_URL"], sessionData["session_id"]);
-                    if (sessionData["wc_URL"] != "" && sessionData["session_id"] != "no session"){
-                        console.log("here???");
-                        console.log(sessionData['wc_URL']);
+                    if (sessionData["wc_URL"] != "" && sessionData["session_id"] != "no session")
                         setIsSession(true);
-                    }
-
+                    
                 } catch (error) {
                     console.error('Error handling interactions file:', error);
                 }
