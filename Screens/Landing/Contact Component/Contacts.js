@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View } from 'react-native';
 import * as Contacts from 'expo-contacts';
@@ -8,9 +8,10 @@ import ContactCell from '../../../Components/Cells/contactCell';
 import ValidateSession from '../../../Components/validateSession';
 import mie from '@maxklema/mie-api-tools';
 
-const ContactsWidget = () => {
+const ContactsWidget = ({isSession}) => {
 
     const [userContacts, setUserContacts] = useState([]);
+    const [isSessionValid, setIsSessionValid] = useState();
     
     useFocusEffect(
         React.useCallback(() => {
@@ -26,6 +27,10 @@ const ContactsWidget = () => {
 
         }, [])
     )
+
+    useEffect(() => {
+        setIsSessionValid(isSession);
+    }, [isSession]);
 
     const parseContacts = (user_contacts) => {
         const parsed_contacts = JSON.parse(user_contacts);
@@ -72,7 +77,7 @@ const ContactsWidget = () => {
     return (
         
         <View style={styles.contacts_container}>
-            <ValidateSession data={userContacts} header={"Contacts"} clearData={clearAllContacts}>
+            <ValidateSession data={userContacts} header={"Contacts"} clearData={clearAllContacts} sessionValid={isSessionValid}>
                 { userContacts.length > 0 ? 
                     <>
                         <View style={styles.contact_warning}>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Text } from "react-native-paper";
 import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from "@react-navigation/native";
@@ -9,12 +9,12 @@ import { sessionCheck } from "../Screens/WebView/WebView HTML Injection/sessionC
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import InputButton from "./inputButton";
 
-const ValidateSession = ({children, clearData, header, data}) => {
+const ValidateSession = ({children, clearData, header, data, sessionValid}) => {
 
     const [key, SetKey] = useState(0); //used to re-render webView on load.
     const [isLoading, setIsLoading] = useState(true);
     const [isLocked, setIsLocked] = useState(true);
-    const [isSession, setIsSession] = useState(false);
+    const [isSession, setIsSession] = useState();
     const [storedSession, setStoredSession] = useState('');
     const webViewRef = useRef(null);
     
@@ -34,8 +34,12 @@ const ValidateSession = ({children, clearData, header, data}) => {
                     let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                     setStoredSession(sessionData["session_id"]);
 
-                    if (sessionData["wc_URL"] != "")
+                    // console.log(sessionData["wc_URL"], sessionData["session_id"]);
+                    if (sessionData["wc_URL"] != "" && sessionData["session_id"] != "no session"){
+                        console.log("here???");
+                        console.log(sessionData['wc_URL']);
                         setIsSession(true);
+                    }
 
                 } catch (error) {
                     console.error('Error handling interactions file:', error);
@@ -45,6 +49,10 @@ const ValidateSession = ({children, clearData, header, data}) => {
 
         }, [mie.practice.value])
     );
+
+    useEffect(() => {
+        setIsSession(sessionValid);
+    }, [sessionValid])
 
     const headers = {
         'cookie': `wc_miehr_${mie.practice.value}_session_id=${mie.Cookie.value}`

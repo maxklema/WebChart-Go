@@ -12,6 +12,7 @@ import * as FileSystem from 'expo-file-system';
 
 const Settings = ({navigation}) => {
 
+    const [isSession, setIsSession] = useState(false);
     const [sessionData, setSessionData] = useState('');
     const [storedSystems, setStoredSystems] = useState([]);    
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
@@ -28,13 +29,17 @@ const Settings = ({navigation}) => {
     useFocusEffect(
         React.useCallback(() => {
             const getSessionInformation = async () => {
+                setIsSession(false);
                 
                 //session ID
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                 
-                if (sessionData['session_id'] != '' && sessionData['session_id'] != null)
+                if (sessionData['session_id'] != 'no session' && sessionData['session_id'] != null){
                     setSessionData(sessionData['session_id']);
+                    if (sessionData['wc_URL'] != '')
+                        setIsSession(true);
+                }
 
                 // Systems URLs
                 const systemsURI = FileSystem.documentDirectory + "systems.json";            
@@ -42,7 +47,7 @@ const Settings = ({navigation}) => {
 
                 if (systemsData)
                     setStoredSystems(systemsData.system_URLS);
-    
+
                 setUserSystemsRaw(systemsData);
             }
             getSessionInformation();
@@ -53,6 +58,8 @@ const Settings = ({navigation}) => {
         switch(type) {
             case "session":
                 await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "session.json"), JSON.stringify({"session_id": "no session", "wc_handle": "", "wc_URL": ""}));           
+                setSessionData('');
+                setIsSession(false);
                 break;
             case "system":
                 let systems = storedSystems.filter(function (url) { return url != data});
@@ -60,7 +67,19 @@ const Settings = ({navigation}) => {
                 let user_systems_whole = userSystemsRaw;
                 user_systems_whole.system_URLS = systems;
                 await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));
+
+                //check if URL is associated with current session
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+
+                if (sessionData['wc_URL'] == data){
+                    sessionData['wc_URL'] = "";
+                    await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+                    setIsSession(false);
+                }
+
                 break;
+            
         }
     
     };
@@ -70,6 +89,14 @@ const Settings = ({navigation}) => {
         user_systems_whole.system_URLS = []
         setStoredSystems(user_systems_whole.system_URLS);
         await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));        
+        
+        //update session data
+        const sessionURI = FileSystem.documentDirectory + "session.json";
+        let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+        sessionData['wc_URL'] = "";
+        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+        
+        setIsSession(false);
     }
 
     const openSystem = async(data) => {
@@ -117,7 +144,7 @@ const Settings = ({navigation}) => {
                 </View>
 
                 {/* WebChart Contacts Stored on Device */}
-                <ContactsWidget />
+                <ContactsWidget isSession={isSession}/>
                 
                 {/* Systems Data  */}
                 <View style={styles.systems_container}>
