@@ -9,7 +9,7 @@ const patientCallText = async (patID, type) => {
     const numbers = await getPhoneNumbers(patID);
     const patNameData = await mie.retrieveRecord("patients", ["email", "first_name", "last_name", "title", "suffix"], {pat_id: patID});
     let patName = patNameData[0]["first_name"];
-    let patFullName = `${patNameData['0']['title'] != "" ? patNameData['0']['title'] : ""}${patNameData['0']['first_name']} ${patNameData['0']['last_name']} ${patNameData['0']['suffix']}`;
+    let patFullName = `${patNameData['0']['title'] != "" ? patNameData['0']['title'] : ""}${patNameData['0']['first_name']} ${patNameData['0']['suffix'] == "" ? patNameData['0']['last_name'] : patNameData['0']['last_name'] + " " + patNameData['0']['suffix']}`;
     let callOptions = [];
 
     //iterate over each number to put in the alert

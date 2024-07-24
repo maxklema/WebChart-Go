@@ -78,7 +78,7 @@ const WebViewScreen = () => {
                 break;
             default:
                 const data = JSON.parse(event.nativeEvent.data);
-                console.log(data.Cookie);
+                // console.log(data.Cookie);
                 mie.Cookie.value = data.Cookie;
     
                 //Store Cookie and Practice in JSON

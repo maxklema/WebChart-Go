@@ -3,8 +3,11 @@ import { StyleSheet, Text, ActivityIndicator, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Alert } from 'react-native';
+import * as Open from 'expo-linking';
+import getContacts from '../../Screens/WebView/Contacts/getContacts';
 
-const InteractionCell = ({data}) => {
+const InteractionCell = ({data, removeInteraction}) => {
 
     const [interaction, setInteraction] = useState({});
     const [contactIcon, setContactIcon] = useState("");
@@ -24,6 +27,11 @@ const InteractionCell = ({data}) => {
         }
     }, [interaction]);
 
+    useEffect(() => {
+        setInteraction(JSON.parse(data));
+        setInteractionIcon(interaction["type"]);
+    }, [data]);
+
     const setInteractionIcon = (type) => {
         switch(type) {
             case "Email":
@@ -38,6 +46,44 @@ const InteractionCell = ({data}) => {
         }
     }
 
+    
+    const contactPatient = (type) => {
+        console.log("here?");
+        switch(type) {
+            case "Email":
+                Open.openURL(`mailto:${data["Contact Handle"]}`)
+                break;
+            case "SMS":
+                Open.openURL(`sms:${data["Contact Handle"]}`)
+                break;
+            case "CALL":
+                Open.openURL(`tel:${data["Contact Handle"]}`)
+                break;
+        }
+    }
+
+    const interactionOptions = () => {
+        
+        Alert.alert("Choose an Action", "", [
+            {
+                text: `${interaction["type"].charAt(0).toUpperCase() + interaction["type"].slice(1).toLowerCase()} patient again`,
+                onPress: () => contactPatient(interaction["type"])
+            },
+            {
+                text: `Add to contacts`,
+                onPress: () => getContacts(interaction["Pat_ID"])
+            },
+            {
+                text: `Remove interaction`,
+                onPress: () => removeInteraction()
+            },
+            {
+                text: 'Cancel',
+                style: 'cancel'
+            },
+        ]);
+    }
+
     if (isLoading) {
         return (
             <View style={[styles.container, styles.horizontal]}>
@@ -49,7 +95,7 @@ const InteractionCell = ({data}) => {
             <View>
                 <TouchableOpacity 
                     activeOpacity={0.7} 
-                    onPress={() => {}} 
+                    onPress={() => interactionOptions()} 
                     style={styles.DataContainer}
                 >
                     <View style={styles.contact_type}>

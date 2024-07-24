@@ -11,10 +11,9 @@ import InputButton from "../../Components/inputButton";
 
 const InteractionsPage = () => {
 
-    const [recentInteractions, setRecentInteractions] = useState([]);
-    const [interactionsToLoad, setInteractionsToLoad] = useState(0);
+    const [interactions, setInteractions] = useState({});
+    const [loadedInteractions, setLoadedInteractions] = useState([]);
     const [displayLoadMoreButton, setDisplayLoadMoreButton] = useState(true);
-    const [interactionsData, setInteractionsData] = useState([]);
     const multiple = 2;
 
     useFocusEffect(
@@ -24,7 +23,8 @@ const InteractionsPage = () => {
                 // Load Interactions Data
                 const fileUri = FileSystem.documentDirectory + "interactions.json";
                 let interactionsRaw = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
-                parseInteractions(interactionsRaw);
+                if (interactionsRaw[mie.practice.value] != null)
+                    setInteractions(interactionsRaw[mie.practice.value]);
                 
             };
         readInteractionsData();
@@ -34,59 +34,45 @@ const InteractionsPage = () => {
 
     useEffect(() => {
 
-        const interactionKeys = Object.keys(interactionsData);
-        updateRecentInterations(interactionKeys, multiple);
+        const interactionKeys = Object.keys(interactions);
 
-        if (interactionKeys.length > interactionsToLoad && interactionKeys.length <= multiple){
-            setInteractionsToLoad(interactionKeys.length);
+        //looks nice? no. Works? yes.
+
+        //ran on first load
+        if (loadedInteractions.length == 0 && Object.keys(interactions).length > multiple){
+            updateLoadedInterations(interactionKeys, multiple);
+            setDisplayLoadMoreButton(true);
+        } else if (loadedInteractions.length == 0 && Object.keys(interactions).length <= multiple) {
+            updateLoadedInterations(interactionKeys, Object.keys(interactions).length);
+            setDisplayLoadMoreButton(false); 
+
+        //adds enough to reach the next multiple, then sees if there are more interactions that need to be loaded
+        } else if (loadedInteractions.length % multiple != 0 && loadedInteractions.length + (loadedInteractions.length % multiple) == Object.keys(interactions).length) {
             setDisplayLoadMoreButton(false);
-        } else if (interactionsToLoad == 0 && interactionKeys.length > multiple) {
-            setInteractionsToLoad(multiple);
+            updateLoadedInterations(interactionKeys, loadedInteractions.length % multiple);
+        } else if (loadedInteractions.length % multiple != 0 && loadedInteractions.length + (loadedInteractions.length % multiple) < Object.keys(interactions).length) {
             setDisplayLoadMoreButton(true);
-        } else if (interactionKeys.length > interactionsToLoad && interactionKeys.length > multiple) {
-            setDisplayLoadMoreButton(true);
+            updateLoadedInterations(interactionKeys, loadedInteractions.length % multiple);
         }
 
-    }, [interactionsData])
-
-    useEffect(() => {}, [interactionsToLoad, setDisplayLoadMoreButton, recentInteractions]);
-
-    const parseInteractions = (interactionsRaw) => {
-        if (interactionsData.length == 0 && interactionsRaw[mie.practice.value] != null){
-            setInteractionsData(interactionsRaw[mie.practice.value]);
-        } else {
-            const interactionKeys = Object.keys(interactionsData);
-
-            if (interactionKeys.length > interactionsToLoad && interactionKeys.length <= multiple){
-                setInteractionsToLoad(interactionKeys.length);
-                setDisplayLoadMoreButton(false);
-            } else if (interactionsToLoad == 0 && interactionKeys.length > multiple) {
-                setInteractionsToLoad(multiple);
-                setDisplayLoadMoreButton(true);
-            } else if (interactionKeys.length > interactionsToLoad && interactionKeys.length > multiple) {
-                setDisplayLoadMoreButton(true);
-            }
-
+        //interacts equal to a multiple, checks if there are more interactions
+        else if (loadedInteractions.length % multiple == 0 && loadedInteractions.length < Object.keys(interactions).length) {
+            setDisplayLoadMoreButton(true);
+        } else if (loadedInteractions.length % multiple == 0 && loadedInteractions.length == Object.keys(interactions).length) {
+            setDisplayLoadMoreButton(false);
         }
-    }
+            
 
-    const updateRecentInterations = (interactionKeys, amount) => {
+    }, [interactions])
 
-        console.log(interactionKeys.slice(2,3));
-        console.log("INTERACTIONS TO LOAD " + interactionsToLoad);
-        console.log("AMOUNT: " + amount);
-        const nextKeySet = interactionKeys.slice(interactionsToLoad, interactionsToLoad + amount);
-        console.log(nextKeySet);
-        let interactions = recentInteractions;
+    useEffect(() => {}, [displayLoadMoreButton, loadedInteractions]);
 
-        nextKeySet.forEach(key => {
-            interactions.unshift(interactionsData[key]); //push value to front of array
-        })
+    const updateLoadedInterations = (interactionKeys, amount) => {
 
-        console.log(interactions);
-
-        setRecentInteractions(interactions);
-
+        const nextKeySet = interactionKeys.slice(loadedInteractions.length, loadedInteractions.length + amount);
+        const newInteractions = nextKeySet.map(key => interactions[key]);
+        
+        setLoadedInteractions(prevLoadedInteractions => [...newInteractions, ...prevLoadedInteractions]);
     }
 
     const clearData = async () => {
@@ -94,26 +80,35 @@ const InteractionsPage = () => {
         const interactionsData = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
         delete interactionsData[mie.practice.value];
         await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(interactionsData));
-        setRecentInteractions([]);
-        setInteractionsToLoad(0);
+        setLoadedInteractions([]);
+        setInteractions({});
         setDisplayLoadMoreButton(false);
     }
 
     const loadMoreInteractions = () => {
         
-        const interactionKeys = Object.keys(interactionsData);
+        const interactionKeys = Object.keys(interactions);
 
-        if ((interactionsToLoad + multiple) < interactionKeys.length){
-            updateRecentInterations(interactionKeys, multiple);
-            setInteractionsToLoad(prev => prev + multiple);
+        if ((loadedInteractions.length + multiple) < interactionKeys.length){
+            updateLoadedInterations(interactionKeys, multiple);
         } else {
-            let interactionsLeft = interactionKeys.length - interactionsToLoad
-            updateRecentInterations(interactionKeys, interactionsLeft);
-
-            setInteractionsToLoad(prev => prev + interactionsLeft);
+            let interactionsLeft = interactionKeys.length - loadedInteractions.length;
+            updateLoadedInterations(interactionKeys, interactionsLeft);
             setDisplayLoadMoreButton(false);
         }
-        
+
+    }
+
+    const removeInteraction = async (index) => {
+
+        // const interactionKeys = Object.keys(interactionsData)
+        // const key = interactionKeys[interactionKeys.length - index - 1];
+
+        // //update JSON interactions storage
+        // const fileUri = FileSystem.documentDirectory + "interactions.json";
+        // let interactionsRaw = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
+        // delete interactionsRaw[mie.practice.value][key];
+        // await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(interactionsRaw));
 
     }
 
@@ -122,12 +117,12 @@ const InteractionsPage = () => {
             <View style={styles.parent_container}>
 
                 {/* Recent Interactions */}
-                <ValidateSession data={recentInteractions} header={"Recent Interactions"} clearData={clearData}>
+                <ValidateSession data={loadedInteractions} header={"Recent Interactions"} clearData={clearData}>
                     <>
-                        { recentInteractions.length > 0 ? 
+                        { loadedInteractions.length > 0 ? 
                             <View>
-                                { recentInteractions.slice(0, interactionsToLoad)?.map((interaction, index) => (
-                                    <InteractionCell key={index} data={JSON.stringify(interaction)}/>
+                                { loadedInteractions.map((interaction, index) => (
+                                    <InteractionCell key={index} removeInteraction={() => removeInteraction(index)} data={JSON.stringify(interaction)}/>
                                 ))}
                                 { displayLoadMoreButton ? 
                                     <InputButton 
