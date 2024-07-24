@@ -39,10 +39,10 @@ yarn-error.*
 test2.html
 
 #unignore for builds
-.npmrc
-metro.config.mjs
-babel.config.cjs
-eas.json
-index.js
+# .npmrc
+# metro.config.mjs
+# babel.config.cjs
+# eas.json
+# index.js
 
 

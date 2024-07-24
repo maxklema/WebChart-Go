@@ -1,13 +1,11 @@
 import * as Contacts from 'expo-contacts';
 import formatContacts from './formatContacts';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
+import * as FileSystem from 'expo-file-system';
 
 const getPatientInfo = async (patID) => {
-        
-    const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone" ]
-
+    const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone", "work_phone" ]
     let patInfo = await mie.retrieveRecord("patients", fields, { pat_id: patID})
     return patInfo;
 }
@@ -30,18 +28,24 @@ const getContacts = (patID) => {
                         'wc_handle': mie.practice.value
                     }
 
-                    let patientContactInfo = await AsyncStorage.getItem("patient-contacts");
-                    patientContactInfo = JSON.parse(patientContactInfo);
-                    patientContactInfo[`${patID}`] = patientData;
+                    const contactURI = FileSystem.documentDirectory + "contacts.json";
+                    let patientContactData = await FileSystem.readAsStringAsync(contactURI);
+                    patientContactData = JSON.parse(patientContactData); //contacts JSON parsed.
 
-                    await AsyncStorage.setItem("patient-contacts", JSON.stringify(patientContactInfo));                        
+                    patientContactData[mie.practice.value][`${patID}`] = patientData;
+
+                    await FileSystem.writeAsStringAsync(contactURI, JSON.stringify(patientContactData));
                 }
 
-                //add to local storage
+                //add to JSON storage.
 
-                let miePatient = await AsyncStorage.getItem("patient-contacts");
+                const contactURI = FileSystem.documentDirectory + "contacts.json";
+                let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
 
-                if (!miePatient || !(JSON.parse(miePatient))[`${patID}`]){
+                if (!contactData[mie.practice.value])
+                    contactData[mie.practice.value] = {};
+
+                if (!contactData[mie.practice.value][`${patID}`]){
 
                     let patInfo = await getPatientInfo(patID);
                     const contactId = await formatContacts(patInfo, '');
@@ -54,18 +58,9 @@ const getContacts = (patID) => {
                         'suffix': patInfo[0]['suffix'],
                         'wc_handle': mie.practice.value
                     }
-
-                    //determine whether this is the first patient contact to store
                     
-                    if (!miePatient) {
-                        let patient_contacts = {};
-                        patient_contacts[`${patID}`] = patientData;
-                        await AsyncStorage.setItem("patient-contacts", JSON.stringify(patient_contacts));
-                    } else {
-                        miePatient = JSON.parse(miePatient);
-                        miePatient[`${patID}`] = patientData;
-                        await AsyncStorage.setItem("patient-contacts", JSON.stringify(miePatient));
-                    }
+                    contactData[mie.practice.value][`${patID}`] = patientData;
+                    await FileSystem.writeAsStringAsync(contactURI, JSON.stringify(contactData));
                 
                     Alert.alert('Success', (patInfo[0]["suffix"] == "" ? `${patInfo[0]["title"]} ${patInfo[0]["first_name"]} ${patInfo[0]["last_name"]} added to contacts.` : `${patInfo[0]["title"]} ${patInfo[0]["first_name"]} ${patInfo[0]["last_name"]}  ${patInfo[0]["suffix"]} added to contacts.`), [
                         {
@@ -77,10 +72,7 @@ const getContacts = (patID) => {
                     Alert.alert('Contact Found', "This patient already has a contact on your device. Would you like to update their contact?", [
                         {
                             text: 'Update',
-                            onPress: () => {
-                                miePatient = JSON.parse(miePatient);
-                                updateContact(miePatient[`${patID}`]['contact_id']);
-                            }
+                            onPress: () => {updateContact(contactData[mie.practice.value][`${patID}`]['contact_id']);}
                         },
                         {
                             text: 'Cancel',

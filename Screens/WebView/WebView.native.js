@@ -1,13 +1,16 @@
 import React, { useRef, useState, useContext, useEffect } from "react";
 import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Linking} from "react-native";
 import { WebView } from "react-native-webview";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import mie from '@maxklema/mie-api-tools';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
+import * as FileSystem from 'expo-file-system';
+
+import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
+import patientCallText from "./Patient Messaging/patientCallText";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
@@ -19,7 +22,7 @@ const WebViewScreen = () => {
     
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
-    const {isToggled, setIsToggled} = useContext(SettingsContext);
+    const { isToggled } = useContext(SettingsContext);
     const [patID, setPatID] = useState(null);
 
     //back and forth buttons
@@ -30,15 +33,13 @@ const WebViewScreen = () => {
     useFocusEffect(
         React.useCallback(() => {
 
-            //AsyncStorage.removeItem('mie_session_id');
-            async function getStoredCookie() {
-                const mieSession = await AsyncStorage.getItem('mie_session_id');
-                if (!mieSession){
-                    await AsyncStorage.setItem('mie_session_id', '');
-                }
-                setSessionID(mieSession);
+            const getStoredCookie = async () => {
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+                setSessionID(sessionData["session_id"]);
             }
             getStoredCookie();
+
         }, [])
     ) 
 
@@ -56,29 +57,48 @@ const WebViewScreen = () => {
             setPatID(parseInt(url.substring(url.indexOf('pat_id=')+7,url.length)))
             webViewRef.current.injectJavaScript(patientPageJSInject);
         }
-    }       
+    }
 
     const onMessage = async (event) => {
         
         const message = event.nativeEvent.data;
 
-        if (message == 'getContacts'){
-            getContacts(patID);
-        } else {
-            const data = JSON.parse(event.nativeEvent.data);
-            console.log(data.Cookie);
-            mie.Cookie.value = data.Cookie;
-            await AsyncStorage.setItem('mie_session_id', mie.Cookie.value);
+        switch(message) {
+            case 'getContacts':
+                getContacts(patID);
+                break;
+            case 'sendMessage':
+                patientCallText(patID, 'Text');
+                break;
+            case 'makeCall':
+                patientCallText(patID, 'Call');
+                break;
+            case 'sendEmail':
+                sendEmail(patID);
+                break;
+            default:
+                const data = JSON.parse(event.nativeEvent.data);
+                // console.log(data.Cookie);
+                mie.Cookie.value = data.Cookie;
+    
+                //Store Cookie and Practice in JSON
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
 
-            let JSON_data;
-            JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
-            mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+                sessionData["session_id"] = mie.Cookie.value;
+                sessionData["wc_handle"] = mie.practice.value;
+                sessionData["wc_URL"] = mie.URL.value;
 
-            console.log('----------------------');
-            console.log(mie.User_PatID.value);
-            console.log(mie.Cookie.value);
+                await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+
+                let JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
+                mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
+    
+                // console.log('----------------------');
+                // console.log(mie.User_PatID.value);
+                // console.log(mie.Cookie.value);
+                break;
         }
-
         
     }
 
@@ -115,7 +135,7 @@ const WebViewScreen = () => {
                     style={styles.webview} 
                     source={{ 
                         uri: mie.URL.value,
-                        headers: headers,
+                        headers: headers
                     }}
                     onNavigationStateChange={navStateChange} 
                     onMessage={onMessage}

@@ -1,43 +1,20 @@
 import React, { useState, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { 
-  StyleSheet, 
-  Text, 
-  View,
-  Switch,
-  ScrollView,
-  SafeAreaView, 
-} from 'react-native';
+import { StyleSheet, Text, View,Switch } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
 import InputButton from '../../Components/inputButton';
-import DataCell from '../../Components/DataCell';
+import DataCell from '../../Components/Cells/dataCell';
 import { SettingsContext } from '../Context/context';
-import * as Contacts from 'expo-contacts';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-
-const Container = ({children}) => {
-    return (
-        <SafeAreaView  style={styles.SAVContainer}>
-            <ScrollView alwaysBounceVertical={false}>
-                {React.Children.map(children, (child) => 
-                    React.cloneElement(child, {
-                        style: [child.props.style],
-                    })
-                )}
-
-            </ScrollView>
-        </SafeAreaView>
-    );
-}
+import Container from '../../Components/Container';
+import ContactsWidget from './Contact Component/Contacts';
+import * as FileSystem from 'expo-file-system';
 
 const Settings = ({navigation}) => {
 
+    const [isSession, setIsSession] = useState(false);
     const [sessionData, setSessionData] = useState('');
-    const [storedSystems, setStoredSystems] = useState([]);
-    const [userContacts, setUserContacts] = useState([]);
-    
+    const [storedSystems, setStoredSystems] = useState([]);    
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
     const {isToggled, setIsToggled} = useContext(SettingsContext);
     
@@ -51,64 +28,58 @@ const Settings = ({navigation}) => {
 
     useFocusEffect(
         React.useCallback(() => {
-            
-            async function getCookie() {
-                const session_ID = await AsyncStorage.getItem('mie_session_id');
-                const user_systems = await AsyncStorage.getItem('wc-system-urls');
-                const user_contacts = await AsyncStorage.getItem('patient-contacts');
-                if (session_ID != '' && session_ID != null)
-                    setSessionData(session_ID);
-                if (user_systems) {
-                    const parsed_us = JSON.parse(user_systems);
-                    setStoredSystems(parsed_us.system_URLS);
-                }
-                if (user_contacts) {
-                    parseContacts(user_contacts);
+            const getSessionInformation = async () => {
+                setIsSession(false);
+                
+                //session ID
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+                
+                if (sessionData['session_id'] != 'no session' && sessionData['session_id'] != null){
+                    setSessionData(sessionData['session_id']);
+                    if (sessionData['wc_URL'] != '')
+                        setIsSession(true);
                 }
 
-                setUserSystemsRaw(JSON.parse(user_systems));
+                // Systems URLs
+                const systemsURI = FileSystem.documentDirectory + "systems.json";            
+                const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
+
+                if (systemsData)
+                    setStoredSystems(systemsData.system_URLS);
+
+                setUserSystemsRaw(systemsData);
             }
-
-            getCookie();
-
+            getSessionInformation();
         }, [])
     )
-
-    const parseContacts = (user_contacts) => {
-        const parsed_contacts = JSON.parse(user_contacts);
-        let contacts = []
-        for (const contact in parsed_contacts){
-            contacts.push(parsed_contacts[contact]);
-        }
-        setUserContacts(contacts);
-    }
 
     const deleteData = async (type, data) => {
         switch(type) {
             case "session":
-                await AsyncStorage.removeItem('mie_session_id');           
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "session.json"), JSON.stringify({"session_id": "no session", "wc_handle": "", "wc_URL": ""}));           
                 setSessionData('');
+                setIsSession(false);
                 break;
             case "system":
                 let systems = storedSystems.filter(function (url) { return url != data});
                 setStoredSystems(systems);
                 let user_systems_whole = userSystemsRaw;
                 user_systems_whole.system_URLS = systems;
-                await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_systems_whole));
-                break;
-            case "contacts":
-                let contact_id = data['contact_id'];
-                try { await Contacts.removeContactAsync(contact_id); } catch {}
-                let stored_contacts = JSON.parse(await AsyncStorage.getItem("patient-contacts"));
-                
-                for (let key in stored_contacts){
-                    if (stored_contacts[key]["contact_id"] == contact_id) {
-                        delete stored_contacts[key];
-                        await AsyncStorage.setItem("patient-contacts", JSON.stringify(stored_contacts));
-                        break;
-                    }
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));
+
+                //check if URL is associated with current session
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+
+                if (sessionData['wc_URL'] == data){
+                    sessionData['wc_URL'] = "";
+                    await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+                    setIsSession(false);
                 }
-                parseContacts(JSON.stringify(stored_contacts));
+
+                break;
+            
         }
     
     };
@@ -117,13 +88,29 @@ const Settings = ({navigation}) => {
         let user_systems_whole = userSystemsRaw;
         user_systems_whole.system_URLS = []
         setStoredSystems(user_systems_whole.system_URLS);
-        await AsyncStorage.setItem('wc-system-urls', JSON.stringify(user_systems_whole));
+        await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));        
         
+        //update session data
+        const sessionURI = FileSystem.documentDirectory + "session.json";
+        let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+        sessionData['wc_URL'] = "";
+        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+        
+        setIsSession(false);
     }
 
     const openSystem = async(data) => {
         mie.practice.value = data.substring(8, data.indexOf('.'));
         mie.URL.value = data.substring(0,data.indexOf(".com")+4);
+
+        const sessionURI = FileSystem.documentDirectory + "session.json";
+        let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+
+        sessionData['wc_URL'] = mie.URL.value;
+        sessionData['wc_handle'] = mie.practice.value;
+
+        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+
         navigation.navigate('WebChart');
     }
 
@@ -157,33 +144,15 @@ const Settings = ({navigation}) => {
                 </View>
 
                 {/* WebChart Contacts Stored on Device */}
-                <View style={styles.contacts_container}>
-                    <Text style={styles.header}>Contacts</Text>
-                    { userContacts.length > 0 ? 
-                        <>
-                            <View style={styles.contact_warning}>
-                                <Ionicons name="alert-circle-outline" size={21} color='white'></Ionicons>
-                                <Text style={styles.contact_warning_text }>Deleting a contact will remove it from your local storage and your device's contacts.</Text>
-                            </View>
-                            <View>
-                                { userContacts?.map((contact, index) => (
-                                    <DataCell deleteMethod={deleteData} key={index} data={contact} practice={contact['wc_handle']} type="contacts" />
-                                ))}
-                            </View>
-                        </> :
-                    <View style={styles.noData}>
-                        <Text>No stored contacts. Contacts of users will appear here when you add them to your device's contacts from your WebChart system.</Text>
-                    </View>
-                }
-                </View>
-
+                <ContactsWidget isSession={isSession}/>
+                
                 {/* Systems Data  */}
                 <View style={styles.systems_container}>
                     <View style={ styles.systemsDataHeader}>
                         <Text style={styles.headerSy}>Systems Data</Text>
                         { storedSystems.length > 1 ? 
                             <InputButton onPress={deleteSystems} text="Remove All" textStyle={ styles.removeAllButtonText} style={styles.removeAllButton}></InputButton> :
-                            <View />
+                            <></>
                         }
                     </View>
                     { storedSystems.length > 0 ?
@@ -215,13 +184,9 @@ const Settings = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
-    SAVContainer: {
-        flex: 1,
-        backgroundColor: 'rgb(250,250,250)'
-    },
     parent_container: {
         paddingHorizontal: '8%',
-        paddingVertical: '5%'
+        paddingVertical: '5%',
     },
     header: {
         fontSize: 19,
@@ -255,7 +220,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignContent: 'center',
         flexDirection: 'row',
-        
     },
     removeAllButton: {
         backgroundColor: 'transparent',
@@ -301,31 +265,6 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '500'
     },
-
-    // Contacts
-    contacts_container: {
-        marginBottom: '10%',
-    },
-
-    contact_warning: {
-        marginTop: '2%',
-        paddingHorizontal: '6.5%',
-        paddingVertical: '2.5%',
-        backgroundColor: '#d65b27',
-        borderRadius: 12,
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-
-    contact_warning_text: {
-        textAlign: 'left',
-        color: 'white',
-        marginLeft: '3%',
-    }
-
-
 
 })
 

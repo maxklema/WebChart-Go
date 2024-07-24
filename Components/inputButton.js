@@ -12,7 +12,7 @@ const InputButton = ({ style, textStyle, text, ...props}) => {
         <Text style={[styles.text, textStyle]}>{ text }</Text>
     </Pressable>
   );
-       
+  
 }
 
 const styles = StyleSheet.create({

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  View,
+    StyleSheet, 
+    Text, 
+    TouchableOpacity, 
+    View,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 
-const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
+const DataCell = ({data, type, deleteMethod, openMethod}) => {
 
     const [isSession, setIsSession] = useState(true);    
 
@@ -17,22 +17,16 @@ const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
             
             if (type == 'system')
                 setIsSession(false);
+
         }, [])
     )
 
     return (
         <View>
-            { (data != "") ? 
+            { (data != "" && data != "no session") ? 
                 <View style={ styles.DataContainer}>
                     <View style={[isSession && styles.DataValue, !isSession && styles.DataValueSy ]} >
-                        { type == "contacts" ? 
-                            <Text style={styles.handleText} numberOfLines={1} ellipsizeMode="end">{practice}</Text> :
-                            <></>
-                        }
-                        { type == "contacts" ?
-                            <Text numberOfLines={1} ellipsizeMode="end">{data['title'] != "" ? `${data['title']} ` : ""}{data['first_name']} {data['last_name']} {data['suffix']} - {data['contact_id']}</Text> :
-                            <Text numberOfLines={1} ellipsizeMode="end">{data}</Text> 
-                        }
+                        <Text numberOfLines={1} ellipsizeMode="end">{data}</Text>
                     </View>
                     { type == "system" ?
                         <View style={ styles.DeleteDataValueSy }>
@@ -51,7 +45,7 @@ const DataCell = ({data, type, deleteMethod, openMethod, practice=""}) => {
                     }
                 </View> :
                 <View style={styles.noData}>
-                    <Text>No session cookies present. A cookie will appear here when you successfully log in into a WebChart System.</Text>
+                    <Text>No session cookies present. A cookie will appear here when you successfully log in to a WebChart System.</Text>
                 </View>
                 
             }
@@ -102,7 +96,11 @@ const styles = StyleSheet.create({
     handleText: {
         fontSize: 13,
         marginBottom: '1%'
-    }
+    },
+    date: {
+        fontSize: 11,
+        marginBottom: '1%'
+    },
 })
 
 export default DataCell;
