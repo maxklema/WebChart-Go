@@ -11,6 +11,7 @@ import * as FileSystem from 'expo-file-system';
 import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
 import patientCallText from "./Patient Messaging/patientCallText";
+import requestTelehealthPermissions from "./telehealth/requestPermissions";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
@@ -75,6 +76,9 @@ const WebViewScreen = () => {
                 break;
             case 'sendEmail':
                 sendEmail(patID);
+                break;
+            case 'telehealth Access':
+                requestTelehealthPermissions();
                 break;
             default:
                 const data = JSON.parse(event.nativeEvent.data);

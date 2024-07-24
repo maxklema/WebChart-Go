@@ -15,7 +15,7 @@ const InteractionsPage = () => {
     const [loadedInteractions, setLoadedInteractions] = useState([]);
     const [displayLoadMoreButton, setDisplayLoadMoreButton] = useState(true);
     const [isDeleting, setIsDeleting] = useState(false);
-    const multiple = 3;
+    const multiple = 2;
 
     useFocusEffect(
         React.useCallback(() => {

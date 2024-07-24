@@ -10,11 +10,13 @@ export const patientPageJSInject = `
             let message = document.getElementById('message');
             let call = document.getElementById('call');
             let email = document.getElementById('email');
+            let telehealth = document.getElementById('btn-telehealth-visit');
 
             contacts.addEventListener('click', getContacts);
             message.addEventListener('click', sendMessage);
             call.addEventListener('click', makeCall);
             email.addEventListener('click', sendEmail);
+            telehealth.addEventListener('click', goToTelehealth)
 
             function getContacts() {
                 window.ReactNativeWebView.postMessage('getContacts');
@@ -30,6 +32,10 @@ export const patientPageJSInject = `
 
             function sendEmail() {
                 window.ReactNativeWebView.postMessage('sendEmail');
+            }
+
+            function goToTelehealth() {
+                window.ReactNativeWebView.postMessage('telehealth Access');
             }
 
         }, 10)        
