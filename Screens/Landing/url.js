@@ -164,7 +164,7 @@ const UrlScreen = ({ navigation }) => {
             />
             <View style={styles.welcome}>
             <Image 
-                source={require('./../../Assets/wc-logo.jpg')}
+                source={require('./../../Assets/icon.png')}
                 style={styles.wc_logo}
             /> 
             <Text style={styles.welcomeMessage}>Welcome to WebChart Go</Text>
@@ -224,8 +224,9 @@ const styles = StyleSheet.create({
   wc_logo: {
     alignSelf: 'center',
     marginBottom: '5%',
-    height: 50,
-    width: 50
+    height: 65,
+    width: 65,
+    borderRadius: 10
   },
   welcomeMessage: {
     fontSize: 20,

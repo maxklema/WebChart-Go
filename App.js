@@ -78,10 +78,12 @@ const Tab = createBottomTabNavigator();
             for (let i = 0; i < storageNames.length; i++){
               initializeStorage(storageNames[i], initialStorageObject[i]);
             }
+            
             const sessionURI = FileSystem.documentDirectory + "session.json";
             const sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
             mie.Cookie.value = sessionData.session_id;
             mie.practice.value = sessionData.wc_handle;
+            mie.URL.value = sessionData.wc_URL;
           }
 
           setupStorage();
