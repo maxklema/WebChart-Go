@@ -21,12 +21,15 @@ const InteractionsPage = () => {
         React.useCallback(() => {
             const readInteractionsData = async () => {
 
+                setDisplayLoadMoreButton(false);
+                setLoadedInteractions([]);
+
                 // Load Interactions Data
                 const fileUri = FileSystem.documentDirectory + "interactions.json";
                 let interactionsRaw = JSON.parse(await FileSystem.readAsStringAsync(fileUri));
                 if (interactionsRaw[mie.practice.value] != null)
                     setInteractions(interactionsRaw[mie.practice.value]);
-                
+
             };
         readInteractionsData();
 
@@ -36,46 +39,28 @@ const InteractionsPage = () => {
     useEffect(() => {
 
         const interactionKeys = Object.keys(interactions);
-        // console.log("Length: " + interactionKeys.length);
 
         
         if (!isDeleting){
 
             //ran on first load
-            if (loadedInteractions.length == 0 && Object.keys(interactions).length > multiple){
+            if (Object.keys(interactions).length > multiple){
                 updateLoadedInterations(interactionKeys, multiple);
                 setDisplayLoadMoreButton(true);
-            } else if (loadedInteractions.length == 0 && Object.keys(interactions).length <= multiple) {
+            } else if (Object.keys(interactions).length <= multiple) {
                 updateLoadedInterations(interactionKeys, Object.keys(interactions).length);
                 setDisplayLoadMoreButton(false); 
-    
-            //adds enough to reach the next multiple, then sees if there are more interactions that need to be loaded
-            } else if (loadedInteractions.length % multiple != 0 && loadedInteractions.length + (loadedInteractions.length % multiple) == Object.keys(interactions).length) {
-                setDisplayLoadMoreButton(false);
-                updateLoadedInterations(interactionKeys, loadedInteractions.length % multiple);
-            } else if (loadedInteractions.length % multiple != 0 && loadedInteractions.length + (loadedInteractions.length % multiple) < Object.keys(interactions).length) {
-                setDisplayLoadMoreButton(true);
-                updateLoadedInterations(interactionKeys, loadedInteractions.length % multiple);
             }
-    
-            //interacts equal to a multiple, checks if there are more interactions
-            else if (loadedInteractions.length % multiple == 0 && loadedInteractions.length < Object.keys(interactions).length) {
-                setDisplayLoadMoreButton(true);
-            } else if (loadedInteractions.length % multiple == 0 && loadedInteractions.length == Object.keys(interactions).length) {
-                setDisplayLoadMoreButton(false);
-            }
+            
         } else {
             
             if (loadedInteractions.length % multiple == 0 && loadedInteractions.length < Object.keys(interactions).length){
-                console.log(3);
                 setDisplayLoadMoreButton(true);
                 updateLoadInteractionsAfterDeletion(interactionKeys, loadedInteractions.length);
             } else if (loadedInteractions.length % multiple == 0 && loadedInteractions.length == Object.keys(interactions).length) {
-                console.log(4);
                 setDisplayLoadMoreButton(false);
                 updateLoadInteractionsAfterDeletion(interactionKeys, loadedInteractions.length);
             } else if (loadedInteractions.length > Object.keys(interactions).length) {
-                console.log(5);
                 setDisplayLoadMoreButton(false);
                 updateLoadInteractionsAfterDeletion(interactionKeys, loadedInteractions.length - 1);
             }
