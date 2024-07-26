@@ -17,6 +17,7 @@ const UrlScreen = ({ navigation }) => {
     const [warning, setWarning ] = useState('Invalid WebChart URL');
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
+    const [showWelcome, setShowWelcome] = useState(true);
 
     const { isToggled } = useContext(SettingsContext);
 
