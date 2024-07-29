@@ -21,9 +21,18 @@ const UrlScreen = ({ navigation }) => {
     const { isToggled } = useContext(SettingsContext);
 
     useEffect( () => {
-      
-      async function getSettings() {
+      (async() => {
 
+        //set orientation to false
+        let orientationURI = FileSystem.documentDirectory + "orientation.json";
+        let orientationData = JSON.parse(await FileSystem.readAsStringAsync(orientationURI));
+        
+        if (!orientationData["orientation"]){
+          console.log("here?");
+          orientationData["orientation"] = true;
+          await FileSystem.writeAsStringAsync(orientationURI, JSON.stringify(orientationData));
+        }
+        
         if (isToggled.automatic_wc_launch){
           async function launchRecentSystem () {
   
@@ -38,18 +47,14 @@ const UrlScreen = ({ navigation }) => {
               } else {
                 mie.URL.value = recentWC;
               }
-
-              navigation.navigate('WebChart');
-              
+              navigation.navigate('WebChart'); 
             }
-    
           }
           launchRecentSystem();
         } 
-      }
 
-      getSettings();
-
+      })();
+    
     }, [navigation])
 
     useFocusEffect(

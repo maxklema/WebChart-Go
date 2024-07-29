@@ -12,9 +12,11 @@ import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
 import patientCallText from "./Patient Messaging/patientCallText";
 import requestTelehealthPermissions from "./telehealth/requestPermissions";
+import saveDocument from "./Documents/saveDoc";
 
 import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
+import { DocPageJSInject } from "./WebView HTML Injection/documentsPage";
 
 const ConditionalWrapper = ({ condition, wrapper, children }) => 
     condition ? wrapper(children) : children;
@@ -24,7 +26,9 @@ const WebViewScreen = () => {
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
     const { isToggled } = useContext(SettingsContext);
+    
     const [patID, setPatID] = useState(null);
+    const [docID, setDocID] = useState(null);
 
     //back and forth buttons
     const [goBack, setGoBack] = useState(false);
@@ -57,6 +61,9 @@ const WebViewScreen = () => {
         } else if (url.includes('pat_id=')) {
             setPatID(parseInt(url.substring(url.indexOf('pat_id=')+7,url.length)))
             webViewRef.current.injectJavaScript(patientPageJSInject);
+        } else if (url.includes("f=chart&s=doc&v=detail&doc_id=")) {
+            setDocID(parseInt(url.substring(url.indexOf('doc_id=') + 7, url.length)))
+            webViewRef.current.injectJavaScript(DocPageJSInject);
         }
     }
 
@@ -68,18 +75,32 @@ const WebViewScreen = () => {
             case 'getContacts':
                 getContacts(patID);
                 break;
+
             case 'sendMessage':
                 patientCallText(patID, 'Text');
                 break;
+
             case 'makeCall':
                 patientCallText(patID, 'Call');
                 break;
+
             case 'sendEmail':
                 sendEmail(patID);
                 break;
+
             case 'telehealth Access':
                 requestTelehealthPermissions();
                 break;
+
+            case 'saveDocument':
+                // console.log("here?");
+
+                const document = await saveDocument(docID);
+                if (document != "")
+                    await FileSystem.deleteAsync(document);
+                
+                break;
+
             default:
                 const data = JSON.parse(event.nativeEvent.data);
                 // console.log(data.Cookie);
