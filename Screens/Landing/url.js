@@ -46,7 +46,7 @@ const UrlScreen = ({ navigation }) => {
         //set orientation to false
         let orientationURI = FileSystem.documentDirectory + "orientation.json";
         let orientationData = JSON.parse(await FileSystem.readAsStringAsync(orientationURI));
-         
+      
         if (!orientationData["orientation"]){
           orientationData["orientation"] = true;
           await FileSystem.writeAsStringAsync(orientationURI, JSON.stringify(orientationData));

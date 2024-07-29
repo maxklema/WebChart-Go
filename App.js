@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Provider as PaperProvider, Text } from 'react-native-paper';
+import { Provider as PaperProvider } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { SettingsProvider } from './Screens/Context/context';
+import * as FileSystem from 'expo-file-system';
+import mie from '@maxklema/mie-api-tools';
+import { View, ActivityIndicator, StyleSheet} from 'react-native';
+
+//Components / Screens
 import UrlScreen from './Screens/Landing/url';
 import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
-import { SettingsProvider } from './Screens/Context/context';
 import interactionsPage from './Screens/Interactions/interactions-page';
-import * as FileSystem from 'expo-file-system';
-import mie from '@maxklema/mie-api-tools';
 import Orientation from './Screens/Landing/orientation';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import LockScreen from './Screens/Landing/lockScreen';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -62,25 +65,16 @@ const Tab = createBottomTabNavigator();
 
       const [orientation, setOrientation] = useState(false);
       const [isLoading, setIsLoading] = useState(true);
-
+      const [toggleLockScreen, setToggleLockScreen] = useState(true);
+      
       //create storage JSON files
       useEffect(() => {
         (async () => {
 
-            //set Orientation state
-            const orientationURI = FileSystem.documentDirectory + "orientation.json";
-            const orientationInfo = await FileSystem.getInfoAsync(orientationURI);
-            if (!orientationInfo.exists){
-              setOrientation(true);
-            } else {
-              let orientationData = JSON.parse(await FileSystem.readAsStringAsync(orientationURI));
-              if (!orientationData["orientation"])
-                setOrientation(true);
-            }
-
+            await getOrientationData();
             const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json"];
-            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": ""}, {}, {}, { "orientation": false }];
-              
+            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": false}, {}, {}, { "orientation": false }];
+            
             for (let i = 0; i < storageNames.length; i++){
               await initializeStorage(storageNames[i], initialStorageObject[i]);
             }
@@ -90,13 +84,37 @@ const Tab = createBottomTabNavigator();
             mie.Cookie.value = sessionData.session_id;
             mie.practice.value = sessionData.wc_handle;
             mie.URL.value = sessionData.wc_URL;
-            
+
             setIsLoading(false);
-  
 
         })();
-
       }, []);
+
+      const handleInActiveState = async () => {
+
+        //set canAccessSessionID to false;
+        const sessionURI = FileSystem.documentDirectory + "session.json";
+        const sessionInfo = await FileSystem.getInfoAsync(sessionURI);
+
+        if (sessionInfo.exists){
+          const sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+          sessionData["canAccessSessionID"] = false;
+          await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+        }
+      };
+
+      const getOrientationData = async () => {
+        //set Orientation state
+        const orientationURI = FileSystem.documentDirectory + "orientation.json";
+        const orientationInfo = await FileSystem.getInfoAsync(orientationURI);
+        if (!orientationInfo.exists){
+          setOrientation(true);
+        } else {
+          let orientationData = JSON.parse(await FileSystem.readAsStringAsync(orientationURI));
+          if (!orientationData["orientation"])
+            setOrientation(true);
+        }
+      }
 
       const initializeStorage = async (fileName, initialObject) => {
 
@@ -119,6 +137,7 @@ const Tab = createBottomTabNavigator();
                   )}
                   <Stack.Screen name="Back" component={NavBar} options={{ headerShown: false}}/>
                   <Stack.Screen name='WebChart' component={WebViewScreen} />
+                  <Stack.Screen name="Lock Screen" component={LockScreen} options={{ headerShown: false}}/>
               </Stack.Navigator>
               </NavigationContainer>
             </PaperProvider>

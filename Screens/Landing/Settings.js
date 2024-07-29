@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StyleSheet, Text, View,Switch } from 'react-native';
+import { StyleSheet, Text, View, Switch } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
 import InputButton from '../../Components/inputButton';
 import DataCell from '../../Components/Cells/dataCell';
@@ -9,6 +9,8 @@ import { SettingsContext } from '../Context/context';
 import Container from '../../Components/Container';
 import ContactsWidget from './Contact Component/Contacts';
 import * as FileSystem from 'expo-file-system';
+
+import detectAppState from '../../Hooks/detectAppState';
 
 const Settings = ({navigation}) => {
 
@@ -25,6 +27,8 @@ const Settings = ({navigation}) => {
         }));
         await AsyncStorage.setItem(option, `${!isToggled[option]}`)
     }
+
+    detectAppState(navigation);
 
     useFocusEffect(
         React.useCallback(() => {

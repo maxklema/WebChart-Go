@@ -18,10 +18,12 @@ import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
 import { DocPageJSInject } from "./WebView HTML Injection/documentsPage";
 
+import detectAppState from "../../Hooks/detectAppState";
+
 const ConditionalWrapper = ({ condition, wrapper, children }) => 
     condition ? wrapper(children) : children;
 
-const WebViewScreen = () => {
+const WebViewScreen = ({navigation}) => {
     
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
@@ -34,6 +36,8 @@ const WebViewScreen = () => {
     const [goBack, setGoBack] = useState(false);
     const [goForward, setGoForward] = useState(false);
     const [currentURL, setCurrentURL] = useState('');
+
+    detectAppState(navigation);
 
     useFocusEffect(
         React.useCallback(() => {
