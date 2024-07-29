@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, ImageBackground } from 'react-native';
 import SwiperFlatList from 'react-native-swiper-flatlist';
 import InputButton from '../../Components/inputButton';
@@ -8,7 +8,7 @@ import cameraGraphic from '../../Assets/Landing Graphics/camera-graphic.png';
 import saveGraphic from '../../Assets/Landing Graphics/save-graphic.png';
 import readyGraphic from '../../Assets/Landing Graphics/ready-graphic.png';
 
-const FirstLoadSwiper = ({ navigation }) => {
+const Orientation = ({ navigation }) => {
 
     const goToLanding = () => {
         navigation.navigate("Back");
@@ -31,13 +31,17 @@ const FirstLoadSwiper = ({ navigation }) => {
                 {screenGraphics.map((graphic, index) => (
                     <ImageBackground key={index} style={styles.child} source={require("../../Assets/Landing Graphics/background-graphic.png")}>
                         <View style={styles.contentContainer}>
-                        <Image style={styles.graphic} source={graphic} />
-                        <View style={styles.textContent}>
-                            <Text style={styles.header}>{screenHeaders[index]}</Text>
-                            <Text style={styles.subHeader}>{screenSubHeaders[index]}</Text>
-                            <Text style={[styles.regular, { marginTop: '10%' }]}>{regularText[index]}</Text>
-                        </View>
-                        <InputButton onPress={goToLanding} style={styles.button} text="Skip" />
+                            <Image style={styles.graphic} source={graphic} />
+                            <View style={styles.textContent}>
+                                <Text style={styles.header}>{screenHeaders[index]}</Text>
+                                <Text style={styles.subHeader}>{screenSubHeaders[index]}</Text>
+                                <Text style={[styles.regular, { marginTop: '10%' }]}>{regularText[index]}</Text>
+                            </View>
+                            { index != screenGraphics.length - 1 ?
+                                <InputButton onPress={goToLanding} style={styles.button} text="Skip" /> : 
+                                <InputButton onPress={goToLanding} style={styles.button} text="Let's Go!" />
+                            }
+                            
                         </View>
                     </ImageBackground>
                 ))}
@@ -90,14 +94,14 @@ const styles = StyleSheet.create({
     },
     dot: {
         backgroundColor: '#fff',
-        width: 20,
+        width: 10,
         height: 10,
     },
     dotActive: {
         backgroundColor: '#D65B27'
     },
     button: {
-        width: '25%',
+        maxWidths: '40%',
         alignSelf: 'center',
     },
     continueButton: {
@@ -124,4 +128,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default FirstLoadSwiper;
+export default Orientation;
