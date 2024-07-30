@@ -2,7 +2,7 @@ import mie from '@maxklema/mie-api-tools';
 import { Alert } from "react-native";
 import * as Open from 'expo-linking';
 import getPhoneNumbers from '../crawlNumbers';
-import createInteraction from '../../Interactions/createInteraction';
+import createInteraction from '../../Landing/Interactions/createInteraction';
 
 const patientCallText = async (patID, type) => {
 

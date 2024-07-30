@@ -5,13 +5,14 @@ import * as Contacts from 'expo-contacts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as FileSystem from 'expo-file-system';
 import ContactCell from '../../../Components/Cells/contactCell';
-import ValidateSession from '../../../Components/validateSession';
+import ValidateSession from '../../../Components/Verification/validateSession';
 import mie from '@maxklema/mie-api-tools';
 
-const ContactsWidget = ({isSession}) => {
+const ContactsWidget = ({navigation, isSession, dataLocked}) => {
 
     const [userContacts, setUserContacts] = useState([]);
     const [isSessionValid, setIsSessionValid] = useState();
+    const [isDataLocked, setIsDataLocked] = useState();
     
     useFocusEffect(
         React.useCallback(() => {
@@ -30,7 +31,8 @@ const ContactsWidget = ({isSession}) => {
 
     useEffect(() => {
         setIsSessionValid(isSession);
-    }, [isSession]);
+        setIsDataLocked(dataLocked);
+    }, [isSession, dataLocked]);
 
     const parseContacts = (user_contacts) => {
         const parsed_contacts = JSON.parse(user_contacts);
@@ -77,7 +79,14 @@ const ContactsWidget = ({isSession}) => {
     return (
         
         <View style={styles.contacts_container}>
-            <ValidateSession data={userContacts} header={"Contacts"} clearData={clearAllContacts} sessionValid={isSessionValid}>
+            <ValidateSession 
+                data={userContacts} 
+                header={"Contacts"} 
+                clearData={clearAllContacts} 
+                sessionValid={isSessionValid}
+                dataLocked={isDataLocked}
+                navigation={navigation}
+            >
                 { userContacts.length > 0 ? 
                     <>
                         <View style={styles.contact_warning}>

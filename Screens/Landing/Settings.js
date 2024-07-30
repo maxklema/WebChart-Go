@@ -1,14 +1,17 @@
 import React, { useState, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StyleSheet, Text, View,Switch } from 'react-native';
+import { StyleSheet, Text, View, Switch } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
-import InputButton from '../../Components/inputButton';
+import InputButton from '../../Components/Inputs/inputButton';
 import DataCell from '../../Components/Cells/dataCell';
 import { SettingsContext } from '../Context/context';
 import Container from '../../Components/Container';
 import ContactsWidget from './Contact Component/Contacts';
 import * as FileSystem from 'expo-file-system';
+import DataLocked from '../../Components/Verification/DataLocked';
+
+import detectAppState from '../../Hooks/detectAppState';
 
 const Settings = ({navigation}) => {
 
@@ -17,6 +20,7 @@ const Settings = ({navigation}) => {
     const [storedSystems, setStoredSystems] = useState([]);    
     const [userSystemsRaw, setUserSystemsRaw] = useState({});
     const {isToggled, setIsToggled} = useContext(SettingsContext);
+    const [dataLocked, setDataLocked] = useState(false);
     
     const toggleSwitch = async (option) => {
         setIsToggled((prevSettings) => ({
@@ -26,9 +30,12 @@ const Settings = ({navigation}) => {
         await AsyncStorage.setItem(option, `${!isToggled[option]}`)
     }
 
+    detectAppState(navigation);
+
     useFocusEffect(
         React.useCallback(() => {
-            const getSessionInformation = async () => {
+            (async () => {
+                setDataLocked(false);
                 setIsSession(false);
                 
                 //session ID
@@ -49,8 +56,12 @@ const Settings = ({navigation}) => {
                     setStoredSystems(systemsData.system_URLS);
 
                 setUserSystemsRaw(systemsData);
-            }
-            getSessionInformation();
+
+                // check if user is allowed to access session ID
+                if (sessionData["canAccessSessionID"] == false)
+                    setDataLocked(true);
+
+            })();
         }, [])
     )
 
@@ -78,10 +89,8 @@ const Settings = ({navigation}) => {
                     setIsSession(false);
                 }
 
-                break;
-            
+                break;        
         }
-    
     };
 
     const deleteSystems = async() => {
@@ -144,7 +153,7 @@ const Settings = ({navigation}) => {
                 </View>
 
                 {/* WebChart Contacts Stored on Device */}
-                <ContactsWidget isSession={isSession}/>
+                <ContactsWidget navigation={navigation} isSession={isSession} dataLocked={dataLocked}/>
                 
                 {/* Systems Data  */}
                 <View style={styles.systems_container}>
@@ -162,7 +171,7 @@ const Settings = ({navigation}) => {
                             ))} 
                         </View> :
                         <View style={styles.noData}>
-                                <Text>No WebChart systems present. Your systems will appear here when you add a valid WebChart URL.</Text>
+                            <Text>No WebChart systems present. Your systems will appear here when you add a valid WebChart URL.</Text>
                         </View>
                     }
                     
@@ -171,7 +180,11 @@ const Settings = ({navigation}) => {
                 {/* Session Storage */}
                 <View style={styles.session_container}>
                     <Text style={styles.header}>Session Data</Text>
-                    <DataCell deleteMethod={deleteData} data={sessionData} type="session" />
+                    { dataLocked ?
+                        <DataLocked navigation={navigation}/> :    
+                        <DataCell deleteMethod={deleteData} data={sessionData} type="session" />
+                    }
+                    
                 </View>
 
 
@@ -265,7 +278,6 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '500'
     },
-
 })
 
 export default Settings;

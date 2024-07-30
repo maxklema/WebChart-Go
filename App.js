@@ -4,14 +4,18 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import UrlScreen from './Screens/Landing/url';
-import WebViewScreen from './Screens/WebView/WebView.native';
-import Settings from './Screens/Landing/Settings';
 import { SettingsProvider } from './Screens/Context/context';
-import interactionsPage from './Screens/Interactions/interactions-page';
 import * as FileSystem from 'expo-file-system';
 import mie from '@maxklema/mie-api-tools';
-import Orientation from './Screens/Landing/orientation';
+import { View, ActivityIndicator, StyleSheet} from 'react-native';
+
+//Components / Screens
+import UrlScreen from './Screens/Landing/EnterURL';
+import WebViewScreen from './Screens/WebView/WebView.native';
+import Settings from './Screens/Landing/Settings';
+import interactionsPage from './Screens/Interactions/interactions-page';
+import Orientation from './Screens/Landing/Orientation';
+import LockScreen from './Screens/Landing/Local Verification/lockScreen';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -60,13 +64,18 @@ const Tab = createBottomTabNavigator();
   const App = () => {
 
       const [orientation, setOrientation] = useState(false);
-
+      const [isLoading, setIsLoading] = useState(true);
+      
       //create storage JSON files
       useEffect(() => {
-          const setupStorage = async () => {
+        (async () => {
+
+            await getOrientationData();
             const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json"];
-            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": ""}, {}, {}, { "orientation": false }];
-                  
+            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": false, "hasLaunched": false}, {}, {}, { "orientation": false }];
+            
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "session.json");
+
             for (let i = 0; i < storageNames.length; i++){
               await initializeStorage(storageNames[i], initialStorageObject[i]);
             }
@@ -76,43 +85,74 @@ const Tab = createBottomTabNavigator();
             mie.Cookie.value = sessionData.session_id;
             mie.practice.value = sessionData.wc_handle;
             mie.URL.value = sessionData.wc_URL;
-          }
 
-          setupStorage();
+            setIsLoading(false);
 
+        })();
       }, []);
+
+      const getOrientationData = async () => {
+        //set Orientation state
+        const orientationURI = FileSystem.documentDirectory + "orientation.json";
+        const orientationInfo = await FileSystem.getInfoAsync(orientationURI);
+        if (!orientationInfo.exists){
+          setOrientation(true);
+        } else {
+          let orientationData = JSON.parse(await FileSystem.readAsStringAsync(orientationURI));
+          if (!orientationData["orientation"])
+            setOrientation(true);
+        }
+      }
 
       const initializeStorage = async (fileName, initialObject) => {
 
         const storageURI = FileSystem.documentDirectory + fileName;
         const storageInfo = await FileSystem.getInfoAsync(storageURI);
           
-        // await FileSystem.deleteAsync(storageURI);
-
-        if (!storageInfo.exists) {
+        if (!storageInfo.exists)
           await FileSystem.writeAsStringAsync(storageURI, JSON.stringify(initialObject));
-        } else if (fileName == "orientation.json") {
-          if (!initialObject["orientation"])
-            setOrientation(true);
-        }
+        
       }
 
-      return (
-        <SettingsProvider>
-          <PaperProvider>
-            <NavigationContainer>
-            <Stack.Navigator>
-                { !orientation && (
-                  <Stack.Screen name="Welcome" component={Orientation} options={{ headerShown: false}}/> 
-                )}
-                <Stack.Screen name="Back" component={NavBar} options={{ headerShown: false}}/>
-                <Stack.Screen name='WebChart' component={WebViewScreen} />
-            </Stack.Navigator>
-            </NavigationContainer>
-          </PaperProvider>
-        </SettingsProvider>
-      );
+      if (!isLoading) {
+        return (
+          <SettingsProvider>
+            <PaperProvider>
+              <NavigationContainer>
+              <Stack.Navigator>
+                  { orientation && (
+                    <Stack.Screen name="Welcome" component={Orientation} options={{ headerShown: false}}/> 
+                  )}
+                  <Stack.Screen name="Back" component={NavBar} options={{ headerShown: false}}/>
+                  <Stack.Screen name='WebChart' component={WebViewScreen} options={({navigation}) => ({
+                    title: mie.practice.value,
+                  })}/>
+                  <Stack.Screen name="Lock Screen" component={LockScreen} options={{ headerShown: false }}/>
+              </Stack.Navigator>
+              </NavigationContainer>
+            </PaperProvider>
+          </SettingsProvider>
+        );
+      } else {
+        return (
+          <View style={[styles.container, styles.horizontal]}>
+            <ActivityIndicator />
+          </View>
+        )
+      }
       
   }
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    horizontal: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      padding: 10,
+    },
+  });
 
 export default App;

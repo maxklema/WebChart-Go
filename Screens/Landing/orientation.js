@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, ImageBackground } from 'react-native';
 import SwiperFlatList from 'react-native-swiper-flatlist';
-import InputButton from '../../Components/inputButton';
+import InputButton from '../../Components/Inputs/inputButton';
+
 import handWaveGraphic from '../../Assets/Landing Graphics/handWave-graphic.png';
 import contactsGraphic from '../../Assets/Landing Graphics/contacts-graphic.png';
 import cameraGraphic from '../../Assets/Landing Graphics/camera-graphic.png';

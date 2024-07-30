@@ -18,14 +18,17 @@ import { homePageJSInject } from "./WebView HTML Injection/homePage";
 import { patientPageJSInject } from "./WebView HTML Injection/patientPage";
 import { DocPageJSInject } from "./WebView HTML Injection/documentsPage";
 
+import detectAppState from "../../Hooks/detectAppState";
+
 const ConditionalWrapper = ({ condition, wrapper, children }) => 
     condition ? wrapper(children) : children;
 
-const WebViewScreen = () => {
+const WebViewScreen = ({navigation}) => {
     
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
     const { isToggled } = useContext(SettingsContext);
+    const [dataLocked, setDataLocked] = useState(false);
     
     const [patID, setPatID] = useState(null);
     const [docID, setDocID] = useState(null);
@@ -35,16 +38,21 @@ const WebViewScreen = () => {
     const [goForward, setGoForward] = useState(false);
     const [currentURL, setCurrentURL] = useState('');
 
+    detectAppState(navigation);
+
     useFocusEffect(
         React.useCallback(() => {
+            (async () => {
 
-            const getStoredCookie = async () => {
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                 setSessionID(sessionData["session_id"]);
-            }
-            getStoredCookie();
 
+                // check if user is allowed to access session ID
+                if (sessionData["canAccessSessionID"] == false) 
+                    setDataLocked(true);
+
+            })();
         }, [])
     ) 
 
@@ -94,7 +102,6 @@ const WebViewScreen = () => {
 
             case 'saveDocument':
                 // console.log("here?");
-
                 const document = await saveDocument(docID);
                 if (document != "")
                     await FileSystem.deleteAsync(document);
@@ -103,13 +110,13 @@ const WebViewScreen = () => {
 
             default:
                 const data = JSON.parse(event.nativeEvent.data);
-                // console.log(data.Cookie);
                 mie.Cookie.value = data.Cookie;
     
                 //Store Cookie and Practice in JSON
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
 
+                sessionData["canAccessSessionID"] = true;
                 sessionData["session_id"] = mie.Cookie.value;
                 sessionData["wc_handle"] = mie.practice.value;
                 sessionData["wc_URL"] = mie.URL.value;
@@ -118,17 +125,13 @@ const WebViewScreen = () => {
 
                 let JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
                 mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
-    
-                // console.log('----------------------');
-                // console.log(mie.User_PatID.value);
-                // console.log(mie.Cookie.value);
                 break;
         }
         
     }
 
     const headers = {
-        'cookie': `wc_miehr_${mie.practice.value}_session_id=${sessionID}`
+        'cookie': dataLocked ? '' : `wc_miehr_${mie.practice.value}_session_id=${sessionID}`
     }
 
     const navigateBack = () => {

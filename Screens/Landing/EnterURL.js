@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View, SafeAreaView, Image, KeyboardAvoidingView, Platform, StatusBar } from 'react-native';
 import mie from '@maxklema/mie-api-tools';
-import InputBox from '../../Components/inputBox';
-import InputButton from '../../Components/inputButton';
+import InputBox from '../../Components/Inputs/inputBox';
+import InputButton from '../../Components/Inputs/inputButton';
 import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
-import { SettingsContext } from '../Context/context';
 import * as FileSystem from 'expo-file-system';
+
+import detectAppState from '../../Hooks/detectAppState';
 
 const UrlScreen = ({ navigation }) => {
 
@@ -18,43 +19,27 @@ const UrlScreen = ({ navigation }) => {
     const [showWarning, setShowWarning] = useState(false);
     const [storedSystems, setStoredSystems] = useState([]);
 
-    const { isToggled } = useContext(SettingsContext);
-
     useEffect( () => {
-      (async() => {
+      (async () => {
+      
+        //set canAccessSessionID to false;
+        const sessionURI = FileSystem.documentDirectory + "session.json";
+        const sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+        sessionData["hasLaunched"] = false;
+        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
 
         //set orientation to false
         let orientationURI = FileSystem.documentDirectory + "orientation.json";
         let orientationData = JSON.parse(await FileSystem.readAsStringAsync(orientationURI));
-        
+      
         if (!orientationData["orientation"]){
-          console.log("here?");
           orientationData["orientation"] = true;
           await FileSystem.writeAsStringAsync(orientationURI, JSON.stringify(orientationData));
         }
-        
-        if (isToggled.automatic_wc_launch){
-          async function launchRecentSystem () {
-  
-            const systemsURI = FileSystem.documentDirectory + "systems.json";            
-            const user_systems = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
 
-            if (user_systems.system_URLS.length > 0){
-              const recentWC = user_systems.system_URLS[0];
-              mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
-              if (!recentWC.includes("/webchart.cgi")) {
-                mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';
-              } else {
-                mie.URL.value = recentWC;
-              }
-              navigation.navigate('WebChart'); 
-            }
-          }
-          launchRecentSystem();
-        } 
-
+        //Local Authorization
+        await navigation.navigate("Lock Screen"); 
       })();
-    
     }, [navigation])
 
     useFocusEffect(
@@ -75,6 +60,8 @@ const UrlScreen = ({ navigation }) => {
           setSystemsData(); 
       }, [])
     );
+
+    detectAppState(navigation);
 
     const config = {
         method: 'GET',
