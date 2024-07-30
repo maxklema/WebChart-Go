@@ -13,8 +13,8 @@ import { View, ActivityIndicator, StyleSheet} from 'react-native';
 import UrlScreen from './Screens/Landing/EnterURL';
 import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
-import interactionsPage from './Screens/Interactions/interactions-page';
-import Orientation from './Screens/Landing/Orientation';
+import interactionsPage from './Screens/Landing/Interactions/interactions-page';
+import Orientation from './Screens/Landing/orientation.js';
 import LockScreen from './Screens/Landing/Local Verification/lockScreen';
 
 // Create the Stack Navigator
