@@ -7,6 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
 import * as FileSystem from 'expo-file-system';
+import { CommonActions } from "@react-navigation/native";
 
 import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
@@ -28,6 +29,7 @@ const WebViewScreen = ({navigation}) => {
     const [sessionID, setSessionID] = useState('');
     const webViewRef = useRef(null);
     const { isToggled } = useContext(SettingsContext);
+    const [dataLocked, setDataLocked] = useState(false);
     
     const [patID, setPatID] = useState(null);
     const [docID, setDocID] = useState(null);
@@ -41,14 +43,41 @@ const WebViewScreen = ({navigation}) => {
 
     useFocusEffect(
         React.useCallback(() => {
+            (async () => {
 
-            const getStoredCookie = async () => {
+                // navigation.pop(0);
+
+                // setTimeout(() => {
+                //     navigation.reset({
+                //         index: 1,
+                //         routes: [
+                //             { name: 'Back'},
+                //             { name: 'WebChart' }
+                //         ],
+                //     });
+                // }, 3000);
+
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                 setSessionID(sessionData["session_id"]);
-            }
-            getStoredCookie();
 
+                // check if user is allowed to access session ID
+                // console.log("WV LAUNCHED ? " + sessionData["hasLaunched"]);
+                if (sessionData["canAccessSessionID"] == false) 
+                    setDataLocked(true);
+
+                //manage the stack
+                // navigation.dispatch(
+                //     CommonActions.reset({
+                //         index: 1,
+                //         routes: [
+                //             { name: 'Back' },
+                //             { name: 'WebChart' }
+                //         ],
+                //     })
+                // );
+
+            })();
         }, [])
     ) 
 
@@ -98,7 +127,6 @@ const WebViewScreen = ({navigation}) => {
 
             case 'saveDocument':
                 // console.log("here?");
-
                 const document = await saveDocument(docID);
                 if (document != "")
                     await FileSystem.deleteAsync(document);
@@ -107,13 +135,13 @@ const WebViewScreen = ({navigation}) => {
 
             default:
                 const data = JSON.parse(event.nativeEvent.data);
-                // console.log(data.Cookie);
                 mie.Cookie.value = data.Cookie;
     
                 //Store Cookie and Practice in JSON
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
 
+                sessionData["canAccessSessionID"] = true;
                 sessionData["session_id"] = mie.Cookie.value;
                 sessionData["wc_handle"] = mie.practice.value;
                 sessionData["wc_URL"] = mie.URL.value;
@@ -122,17 +150,13 @@ const WebViewScreen = ({navigation}) => {
 
                 let JSON_data = await mie.retrieveRecord("patients", ["pat_id"], { username: data.Username });
                 mie.User_PatID.value = `${JSON_data['0']['pat_id']}`;
-    
-                // console.log('----------------------');
-                // console.log(mie.User_PatID.value);
-                // console.log(mie.Cookie.value);
                 break;
         }
         
     }
 
     const headers = {
-        'cookie': `wc_miehr_${mie.practice.value}_session_id=${sessionID}`
+        'cookie': dataLocked ? '' : `wc_miehr_${mie.practice.value}_session_id=${sessionID}`
     }
 
     const navigateBack = () => {

@@ -8,20 +8,22 @@ import Container from "../../Components/Container";
 import InteractionCell from "../../Components/Cells/interactionCell";
 import ValidateSession from "../../Components/Verification/validateSession";
 import InputButton from "../../Components/Inputs/inputButton";
+import DataLocked from "../../Components/Verification/DataLocked";
 
-const InteractionsPage = () => {
+const InteractionsPage = ({navigation}) => {
 
     const [interactions, setInteractions] = useState({});
     const [loadedInteractions, setLoadedInteractions] = useState([]);
     const [displayLoadMoreButton, setDisplayLoadMoreButton] = useState(true);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [dataLocked, setDataLocked] = useState(false);
     const multiple = 2;
 
     useFocusEffect(
         React.useCallback(() => {
-            const readInteractionsData = async () => {
-
+            ( async () => {
                 setDisplayLoadMoreButton(false);
+                setDataLocked(false);
                 setLoadedInteractions([]);
 
                 // Load Interactions Data
@@ -30,9 +32,14 @@ const InteractionsPage = () => {
                 if (interactionsRaw[mie.practice.value] != null)
                     setInteractions(interactionsRaw[mie.practice.value]);
 
-            };
-        readInteractionsData();
+                const sessionURI = FileSystem.documentDirectory + "session.json";
+                let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
 
+                // check if user is allowed to access session ID
+                if (sessionData["canAccessSessionID"] == false)
+                    setDataLocked(true);
+
+            })();
         }, [mie.practice.value])
     );
 
@@ -126,33 +133,34 @@ const InteractionsPage = () => {
     return (
         <Container style={styles}>
             <View style={styles.parent_container}>
+                <ValidateSession 
+                    data={loadedInteractions} 
+                    header={"Recent Interactions"} 
+                    clearData={clearData}
+                    navigation={navigation}
+                    dataLocked={dataLocked}
+                >
+                    { loadedInteractions.length > 0 ? 
+                        <View>
+                            { loadedInteractions.map((interaction, index) => (
+                                <InteractionCell key={index} removeInteraction={() => removeInteraction(index)} data={JSON.stringify(interaction)}/>
+                            ))}
+                            { displayLoadMoreButton ? 
+                                <InputButton 
+                                    text="Load More Interactions"
+                                    style={styles.loadMoreInteractionsButton}
+                                    textStyle={styles.interactionsButtonText}
+                                    onPress={ () => loadMoreInteractions() }
+                                />: 
+                                <></>
+                            }
 
-                {/* Recent Interactions */}
-                <ValidateSession data={loadedInteractions} header={"Recent Interactions"} clearData={clearData}>
-                    <>
-                        { loadedInteractions.length > 0 ? 
-                            <View>
-                                { loadedInteractions.map((interaction, index) => (
-                                    <InteractionCell key={index} removeInteraction={() => removeInteraction(index)} data={JSON.stringify(interaction)}/>
-                                ))}
-                                { displayLoadMoreButton ? 
-                                    <InputButton 
-                                        text="Load More Interactions"
-                                        style={styles.loadMoreInteractionsButton}
-                                        textStyle={styles.interactionsButtonText}
-                                        onPress={ () => loadMoreInteractions() }
-                                    />: 
-                                    <></>
-                                }
-
-                            </View> :
-                            <View style={styles.noData}>
-                                <Text>You have no recent patient interactions. An interaction will appear when you contact a patient (SMS, Email, Call) through their WebChart.</Text>
-                            </View> 
-                        }
-                    </>
-                </ValidateSession>                       
-
+                        </View> :
+                        <View style={styles.noData}>
+                            <Text>You have no recent patient interactions. An interaction will appear when you contact a patient (SMS, Email, Call) through their WebChart.</Text>
+                        </View> 
+                    }
+                </ValidateSession>
             </View>
         </Container>
     );

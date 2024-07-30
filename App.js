@@ -8,6 +8,7 @@ import { SettingsProvider } from './Screens/Context/context';
 import * as FileSystem from 'expo-file-system';
 import mie from '@maxklema/mie-api-tools';
 import { View, ActivityIndicator, StyleSheet} from 'react-native';
+import { Button } from 'react-native';
 
 //Components / Screens
 import UrlScreen from './Screens/Landing/url';
@@ -72,8 +73,10 @@ const Tab = createBottomTabNavigator();
 
             await getOrientationData();
             const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json"];
-            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": false}, {}, {}, { "orientation": false }];
+            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": false, "hasLaunched": false}, {}, {}, { "orientation": false }];
             
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "session.json");
+
             for (let i = 0; i < storageNames.length; i++){
               await initializeStorage(storageNames[i], initialStorageObject[i]);
             }
@@ -122,8 +125,10 @@ const Tab = createBottomTabNavigator();
                     <Stack.Screen name="Welcome" component={Orientation} options={{ headerShown: false}}/> 
                   )}
                   <Stack.Screen name="Back" component={NavBar} options={{ headerShown: false}}/>
-                  <Stack.Screen name='WebChart' component={WebViewScreen} />
-                  <Stack.Screen name="Lock Screen" component={LockScreen} options={{ headerShown: false}}/>
+                  <Stack.Screen name='WebChart' component={WebViewScreen} options={({navigation}) => ({
+                    title: mie.practice.value,
+                  })}/>
+                  <Stack.Screen name="Lock Screen" component={LockScreen} options={{ headerShown: false }}/>
               </Stack.Navigator>
               </NavigationContainer>
             </PaperProvider>

@@ -19,13 +19,17 @@ const detectAppState = (navigation) => {
 
     useEffect(() => {
         (async () => {        
+
             let previousAppState = AppState.currentState;
 
             const handleAppStateChange = async (currentAppState) => {
                 if (currentAppState == "background" || currentAppState == "inactive"){
                     await handleInActiveState();
-                } else if (currentAppState === 'active' && previousAppState !== 'active') {
+                } else if (currentAppState === 'active' && previousAppState != 'active') {
+                    // console.log(previousAppState);
+                    //set canAccessSessionID to false;
                     await navigation.navigate("Lock Screen");
+
                 }
                 previousAppState = currentAppState;
             };
