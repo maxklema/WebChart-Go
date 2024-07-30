@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context"
-import InputButton from "../../Components/inputButton"
+import InputButton from "../../../Components/Inputs/inputButton"
 import * as FileSystem from 'expo-file-system';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useEffect } from "react";
@@ -24,9 +24,13 @@ const LockScreen = ({ navigation }) => {
                     navigation.goBack();
                 }, 1500);
             } else {
-                console.log("FAILED AUTH");
+                // Authentication Failed - Navigate back to "Enter URL" page
+                sessionData["canAccessSessionID"] = false;
+                await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+                setTimeout(() => {
+                    navigation.navigate("Back");
+                }, 1500);                
             }
-    
         })();
     }, []);
 

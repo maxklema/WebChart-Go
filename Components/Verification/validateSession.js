@@ -1,21 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Text } from "react-native-paper";
 import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from "@react-navigation/native";
 import mie from '@maxklema/mie-api-tools';
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
 import WebView from "react-native-webview";
-import { sessionCheck } from "../Screens/WebView/WebView HTML Injection/sessionCheck";
+import { sessionCheck } from "../../Screens/WebView/WebView HTML Injection/sessionCheck";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import InputButton from "./inputButton";
+import InputButton from "../Inputs/inputButton";
+import DataLocked from "./DataLocked";
 
-const ValidateSession = ({children, clearData, header, data, sessionValid}) => {
+const ValidateSession = ({navigation, children, clearData, header, data, sessionValid, dataLocked}) => {
 
     const [key, SetKey] = useState(0); //used to re-render webView on load.
     const [isLoading, setIsLoading] = useState(true);
     const [isLocked, setIsLocked] = useState(true);
     const [isSession, setIsSession] = useState();
     const [storedSession, setStoredSession] = useState('');
+    const [isDataLocked, setIsDataLocked] = useState();
     const webViewRef = useRef(null);
     
 
@@ -48,7 +49,8 @@ const ValidateSession = ({children, clearData, header, data, sessionValid}) => {
 
     useEffect(() => {
         setIsSession(sessionValid);
-    }, [sessionValid])
+        setIsDataLocked(dataLocked);
+    }, [sessionValid, dataLocked])
 
     const headers = {
         'cookie': `wc_miehr_${mie.practice.value}_session_id=${mie.Cookie.value}`
@@ -84,19 +86,24 @@ const ValidateSession = ({children, clearData, header, data, sessionValid}) => {
                 </View> :
 
                 <>
-                {isLocked && isSession ? 
-
-                    <View style={styles.widget}>
-                        <Ionicons style={styles.lock_icon} name="lock-closed-outline" size={21} color='#FFF'></Ionicons> 
-                        <Text style={styles.left_widget_text}>This content is locked because your session is not valid. Please try logging in again.</Text>
-                    </View> : 
+                { isDataLocked ?  
+                    <DataLocked navigation={navigation}/> : 
                     <>
-                        { isSession ? 
-                            <>{children}</> : 
+                        {isLocked && isSession ? 
+
                             <View style={styles.widget}>
-                                <Ionicons style={styles.lock_icon} name="information-circle-outline" size={21} color='#FFF'></Ionicons> 
-                                <Text style={styles.left_widget_text}>You must add a WebChart System and log in to access this data.</Text>
-                            </View>
+                                <Ionicons style={styles.lock_icon} name="lock-closed-outline" size={21} color='#FFF'></Ionicons> 
+                                <Text style={styles.left_widget_text}>This content is locked because your session is not valid. Please try logging in again.</Text>
+                            </View> : 
+                            <>
+                                { isSession ? 
+                                    <>{children}</> : 
+                                    <View style={styles.widget}>
+                                        <Ionicons style={styles.lock_icon} name="information-circle-outline" size={21} color='#FFF'></Ionicons> 
+                                        <Text style={styles.left_widget_text}>You must add a WebChart System and log in to access this data.</Text>
+                                    </View>
+                                }
+                            </>
                         }
                     </>
                 }

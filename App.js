@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -15,7 +15,7 @@ import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
 import interactionsPage from './Screens/Interactions/interactions-page';
 import Orientation from './Screens/Landing/orientation';
-import LockScreen from './Screens/Landing/lockScreen';
+import LockScreen from './Screens/Landing/Local Verification/lockScreen';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -65,7 +65,6 @@ const Tab = createBottomTabNavigator();
 
       const [orientation, setOrientation] = useState(false);
       const [isLoading, setIsLoading] = useState(true);
-      const [toggleLockScreen, setToggleLockScreen] = useState(true);
       
       //create storage JSON files
       useEffect(() => {
@@ -89,19 +88,6 @@ const Tab = createBottomTabNavigator();
 
         })();
       }, []);
-
-      const handleInActiveState = async () => {
-
-        //set canAccessSessionID to false;
-        const sessionURI = FileSystem.documentDirectory + "session.json";
-        const sessionInfo = await FileSystem.getInfoAsync(sessionURI);
-
-        if (sessionInfo.exists){
-          const sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
-          sessionData["canAccessSessionID"] = false;
-          await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
-        }
-      };
 
       const getOrientationData = async () => {
         //set Orientation state

@@ -6,8 +6,8 @@ import mie from '@maxklema/mie-api-tools';
 import { StyleSheet, View } from "react-native";
 import Container from "../../Components/Container";
 import InteractionCell from "../../Components/Cells/interactionCell";
-import ValidateSession from "../../Components/validateSession";
-import InputButton from "../../Components/inputButton";
+import ValidateSession from "../../Components/Verification/validateSession";
+import InputButton from "../../Components/Inputs/inputButton";
 
 const InteractionsPage = () => {
 
