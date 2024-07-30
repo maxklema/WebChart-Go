@@ -1,7 +1,7 @@
 import mie from '@maxklema/mie-api-tools';
 import { Alert } from "react-native";
 import * as Open from 'expo-linking';
-import createInteraction from '../../Interactions/createInteraction';
+import createInteraction from '../../Landing/Interactions/createInteraction';
 
 const sendEmail = async (patId) => {
     

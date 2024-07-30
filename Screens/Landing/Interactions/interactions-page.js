@@ -5,12 +5,12 @@ import { useFocusEffect } from "@react-navigation/native";
 import mie from '@maxklema/mie-api-tools';
 import { StyleSheet, View } from "react-native";
 
-import Container from "../../Components/Container";
-import InteractionCell from "../../Components/Cells/interactionCell";
-import ValidateSession from "../../Components/Verification/validateSession";
-import InputButton from "../../Components/Inputs/inputButton";
+import Container from "../../../Components/Container";
+import InteractionCell from "../../../Components/Cells/interactionCell";
+import ValidateSession from "../../../Components/Verification/validateSession";
+import InputButton from "../../../Components/Inputs/inputButton";
 
-import detectAppState from "../../Hooks/detectAppState";
+import detectAppState from "../../../Hooks/detectAppState";
 
 const InteractionsPage = ({navigation}) => {
 
