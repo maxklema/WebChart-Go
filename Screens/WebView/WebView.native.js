@@ -7,7 +7,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { SettingsContext } from '../Context/context';
 import * as FileSystem from 'expo-file-system';
-import { CommonActions } from "@react-navigation/native";
 
 import sendEmail from "./Patient Messaging/sendEmail";
 import getContacts from "./Contacts/getContacts";
@@ -45,37 +44,13 @@ const WebViewScreen = ({navigation}) => {
         React.useCallback(() => {
             (async () => {
 
-                // navigation.pop(0);
-
-                // setTimeout(() => {
-                //     navigation.reset({
-                //         index: 1,
-                //         routes: [
-                //             { name: 'Back'},
-                //             { name: 'WebChart' }
-                //         ],
-                //     });
-                // }, 3000);
-
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
                 setSessionID(sessionData["session_id"]);
 
                 // check if user is allowed to access session ID
-                // console.log("WV LAUNCHED ? " + sessionData["hasLaunched"]);
                 if (sessionData["canAccessSessionID"] == false) 
                     setDataLocked(true);
-
-                //manage the stack
-                // navigation.dispatch(
-                //     CommonActions.reset({
-                //         index: 1,
-                //         routes: [
-                //             { name: 'Back' },
-                //             { name: 'WebChart' }
-                //         ],
-                //     })
-                // );
 
             })();
         }, [])

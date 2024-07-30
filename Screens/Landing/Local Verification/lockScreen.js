@@ -6,7 +6,6 @@ import { useEffect, useContext } from "react";
 import { StyleSheet, View, Text, Image } from "react-native";
 import mie from '@maxklema/mie-api-tools';
 import { SettingsContext } from "../../Context/context";
-import { CommonActions } from "@react-navigation/native";
 import { StackActions } from "@react-navigation/native";
 
 import lockGraphic from '../../../Assets/Misc Graphics/lock-graphic.png';
@@ -18,13 +17,8 @@ const LockScreen = ({ navigation }) => {
     useEffect(() => {
         (async () => {
             
-            //set canAccessSessionID to false;
-
             const sessionURI = FileSystem.documentDirectory + "session.json";
             const sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
-                
-            console.log("SESSION DATA LAUNCH? " + sessionData["hasLaunched"]);
-
             const result = await LocalAuthentication.authenticateAsync({
                 "promptMessage": "WebChart Go requests that you verify yourself."
             })
@@ -38,8 +32,7 @@ const LockScreen = ({ navigation }) => {
                 const user_systems = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
 
                 if (isToggled.automatic_wc_launch && !sessionData["hasLaunched"]){
-                    
-                     sessionData["hasLaunched"] = true;
+                    sessionData["hasLaunched"] = true;
                         await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
                     if (user_systems.system_URLS.length > 0){
                     
@@ -52,26 +45,15 @@ const LockScreen = ({ navigation }) => {
                             mie.URL.value = recentWC;
                         }
 
-                        setTimeout(() => {
-                            // navigation.dispatch(
-                            //     CommonActions.reset({
-                            //         index: 0,
-                            //         routes: [ 
-                            //             { name: 'WebChart' }
-                            //         ],
-                            //     })
-                            // );
-                            navigation.navigate("WebChart")
+                        setTimeout(async () => {
+                            await navigation.navigate("WebChart");
                         }, 1500);
 
-                        console.log("after?");
-                        navigation.dispatch(StackActions.popToTop());
-
-
+                        // Pop lock screen off the stack
+                        const popAction = StackActions.pop(1);
+                        navigation.dispatch(popAction);
                     }
                 } else {
-
-                    console.log("HERE?????");
 
                     sessionData["hasLaunched"] = true;
                     await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
@@ -79,7 +61,6 @@ const LockScreen = ({ navigation }) => {
                     setTimeout(() => {
                         navigation.goBack();
                     }, 1500);
-                    
                 }
             } else {
                 // Authentication Failed - Navigate back to "Enter URL" page

@@ -8,6 +8,8 @@ import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
 import * as FileSystem from 'expo-file-system';
 
+import detectAppState from '../../Hooks/detectAppState';
+
 const UrlScreen = ({ navigation }) => {
 
     const [text, onChangeText] = useState('');
@@ -58,6 +60,8 @@ const UrlScreen = ({ navigation }) => {
           setSystemsData(); 
       }, [])
     );
+
+    detectAppState(navigation);
 
     const config = {
         method: 'GET',

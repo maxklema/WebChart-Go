@@ -8,14 +8,13 @@ import { SettingsProvider } from './Screens/Context/context';
 import * as FileSystem from 'expo-file-system';
 import mie from '@maxklema/mie-api-tools';
 import { View, ActivityIndicator, StyleSheet} from 'react-native';
-import { Button } from 'react-native';
 
 //Components / Screens
-import UrlScreen from './Screens/Landing/url';
+import UrlScreen from './Screens/Landing/EnterURL';
 import WebViewScreen from './Screens/WebView/WebView.native';
 import Settings from './Screens/Landing/Settings';
 import interactionsPage from './Screens/Interactions/interactions-page';
-import Orientation from './Screens/Landing/orientation';
+import Orientation from './Screens/Landing/Orientation';
 import LockScreen from './Screens/Landing/Local Verification/lockScreen';
 
 // Create the Stack Navigator
