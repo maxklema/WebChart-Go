@@ -35,10 +35,10 @@ const UrlScreen = ({ navigation }) => {
         if (!orientationData["orientation"]){
           orientationData["orientation"] = true;
           await FileSystem.writeAsStringAsync(orientationURI, JSON.stringify(orientationData));
+        } else {
+          await navigation.navigate("Lock Screen"); 
         }
 
-        //Local Authorization
-        await navigation.navigate("Lock Screen"); 
       })();
     }, [navigation])
 

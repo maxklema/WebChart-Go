@@ -10,6 +10,21 @@ import { StackActions } from "@react-navigation/native";
 
 import lockGraphic from '../../../Assets/Misc Graphics/lock-graphic.png';
 
+const navigateBack = async (goBack, sessionURI, sessionData, navigation) => {
+
+    sessionData["hasLaunched"] = true;
+    await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+
+    setTimeout(() => {
+        if (goBack){
+            navigation.goBack();
+        } else {
+            navigation.navigate("Back");
+        }
+    }, 1500);
+
+}
+
 const LockScreen = ({ navigation }) => {
 
     const { isToggled } = useContext(SettingsContext);
@@ -24,6 +39,7 @@ const LockScreen = ({ navigation }) => {
             })
         
             if (result.success){
+
                 sessionData["canAccessSessionID"] = true;
                 await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
                 
@@ -33,10 +49,9 @@ const LockScreen = ({ navigation }) => {
 
                 if (isToggled.automatic_wc_launch && !sessionData["hasLaunched"]){
                     sessionData["hasLaunched"] = true;
-                        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
-                    if (user_systems.system_URLS.length > 0){
+                    await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
                     
-                        // console.log("HERE?");
+                    if (user_systems.system_URLS.length > 0){
                         const recentWC = user_systems.system_URLS[0];
                         mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
                         if (!recentWC.includes("/webchart.cgi")) {
@@ -52,23 +67,17 @@ const LockScreen = ({ navigation }) => {
                         // Pop lock screen off the stack
                         const popAction = StackActions.pop(1);
                         navigation.dispatch(popAction);
+
+
+                    } else {
+                        await navigateBack(true, sessionURI, sessionData, navigation);
                     }
                 } else {
-
-                    sessionData["hasLaunched"] = true;
-                    await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
-
-                    setTimeout(() => {
-                        navigation.goBack();
-                    }, 1500);
+                    await navigateBack(true, sessionURI, sessionData, navigation);   
                 }
             } else {
                 // Authentication Failed - Navigate back to "Enter URL" page
-                sessionData["canAccessSessionID"] = false;
-                await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
-                setTimeout(() => {
-                    navigation.navigate("Back");
-                }, 1500);                
+                await navigateBack(false, sessionURI, sessionData, navigation);            
             }
         })();
     }, []);

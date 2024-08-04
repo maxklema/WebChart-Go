@@ -70,11 +70,16 @@ const Tab = createBottomTabNavigator();
       useEffect(() => {
         (async () => {
 
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "session.json");
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "interactions.json");
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "systems.json");
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "contacts.json");
+            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "orientation.json");
+
             await getOrientationData();
             const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json"];
-            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": false, "hasLaunched": false}, {}, {}, { "orientation": false }];
-            
-            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "session.json");
+            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": true, "hasLaunched": false}, {}, {}, { "orientation": false }];
+          
 
             for (let i = 0; i < storageNames.length; i++){
               await initializeStorage(storageNames[i], initialStorageObject[i]);

@@ -26,8 +26,6 @@ const detectAppState = (navigation) => {
                 if (currentAppState == "background"){
                     await handleInActiveState();
                 } else if (currentAppState === 'active' && previousAppState == 'background') {
-
-                    //set canAccessSessionID to false;
                     await navigation.navigate("Lock Screen");
 
                 }

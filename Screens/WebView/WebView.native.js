@@ -101,7 +101,6 @@ const WebViewScreen = ({navigation}) => {
                 break;
 
             case 'saveDocument':
-                // console.log("here?");
                 const document = await saveDocument(docID);
                 if (document != "")
                     await FileSystem.deleteAsync(document);

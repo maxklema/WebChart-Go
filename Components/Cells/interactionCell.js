@@ -48,7 +48,6 @@ const InteractionCell = ({data, removeInteraction}) => {
 
     
     const contactPatient = (type) => {
-        console.log("here?");
         switch(type) {
             case "Email":
                 Open.openURL(`mailto:${data["Contact Handle"]}`)
