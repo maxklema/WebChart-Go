@@ -51,8 +51,11 @@ const LockScreen = ({ navigation }) => {
                     sessionData["hasLaunched"] = true;
                     await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
                     
-                    if (user_systems.system_URLS.length > 0){
-                        const recentWC = user_systems.system_URLS[0];
+                    if (user_systems["recent_systems"].length > 0){
+                        
+                        const recentWC = user_systems["recent_systems"][0]["URL"];
+                        console.log(recentWC);
+
                         mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
                         if (!recentWC.includes("/webchart.cgi")) {
                             mie.URL.value = recentWC.substring(0,recentWC.indexOf(".com")+4) + '/webchart.cgi';

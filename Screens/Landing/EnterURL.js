@@ -52,12 +52,11 @@ const UrlScreen = ({ navigation }) => {
             setOnload(true);
           }
 
-          const setSystemsData = async () => {
+          (async() => {
             const systemsURI = FileSystem.documentDirectory + "systems.json";            
             const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
-            setStoredSystems(systemsData.system_URLS);    
-          }
-          setSystemsData(); 
+            setStoredSystems(systemsData['recent_systems']); 
+          })();
       }, [])
     );
 
@@ -93,18 +92,18 @@ const UrlScreen = ({ navigation }) => {
 
           } else {
             setWarningMessage('Valid WebChart Handle', false);
-            mie.practice.value = text;
+            
+            mie.practice.value = data['handle'].toLowerCase();
 
-            if (!data['url'].includes("/webchart.cgi")) {
+            if (!data['url'].endsWith("/webchart.cgi")) {
               mie.URL.value = data['url'] + "webchart.cgi";
             } else {
               mie.URL.value = data['url'];
-            }
-              
+            }              
 
           }
         })
-        .catch((e) => {
+        .catch(() => {
             setWarningMessage('Invalid WebChart Handle', true);
             });
         onChangeText(text);
@@ -116,30 +115,32 @@ const UrlScreen = ({ navigation }) => {
             setWarning('Invalid WebChart URL');
         } else {
 
-          if (URL){
-            mie.practice.value = URL.substring(8, URL.indexOf('.')) 
-            mie.URL.value = URL;
-          }
-
           const systemsURI = FileSystem.documentDirectory + "systems.json";
           const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
-          const user_Systems_URLS = systemsData['system_URLS'];
+          const recentSystems = systemsData['recent_systems'];
+          let system = recentSystems.find(system => system.URL === URL);
 
-          //check if URL is already stored
-          if (!user_Systems_URLS.includes(mie.URL.value)) {
-            user_Systems_URLS.unshift(mie.URL.value);
-            systemsData.system_URLS = user_Systems_URLS;
+          if (!system) {
+            let newSystem = { 
+              "URL": URL,
+              "handle": mie.practice.value
+            }
+
+            recentSystems.unshift(newSystem);
+            systemsData["recent_systems"] = recentSystems;
             await FileSystem.writeAsStringAsync(systemsURI, JSON.stringify(systemsData));
           } else { 
+            mie.URL.value = URL;
+            mie.practice.value = system["handle"];
+
             //set URL to the front of the list
-            user_Systems_URLS.splice(user_Systems_URLS.indexOf(mie.URL.value), 1);
-            user_Systems_URLS.unshift(mie.URL.value);
-            systemsData.system_URLS = user_Systems_URLS;
+            recentSystems.splice(recentSystems.indexOf(system), 1);
+            recentSystems.unshift(system);
+
+            systemsData["recent_systems"] = recentSystems;
             await FileSystem.writeAsStringAsync(systemsURI, JSON.stringify(systemsData));
           }
-          
           onChangeText('');
-
           navigation.navigate('WebChart');
         }
     }
@@ -174,15 +175,15 @@ const UrlScreen = ({ navigation }) => {
                 text="Continue"
                 disabled={isError}
                 style={ isError && styles.nullifyButton }
-                onPress={ () => navigateToLogin() }
+                onPress={ () => navigateToLogin(mie.URL.value) }
             />
             </View>
             { storedSystems.length > 0 ?
             <View style={ styles.Container_RecentSystems }>
                 <Text style={styles.welcomeInstructions}>Recent Systems</Text>
-                { storedSystems.slice(0,3)?.map((URL, index) => (
-                  <Button onPress={() => navigateToLogin(URL)} key={index} style={ styles.recent_URL_Button}>
-                    <Text style={ styles.Button_Text }>{URL}</Text>
+                { storedSystems.slice(0,3)?.map((system, index) => (
+                  <Button onPress={() => navigateToLogin(system["URL"])} key={index} style={ styles.recent_URL_Button}>
+                    <Text style={ styles.Button_Text }>{system['URL']}</Text>
                   </Button>
                 ))}
             </View>

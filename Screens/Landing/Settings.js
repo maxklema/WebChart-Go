@@ -53,7 +53,7 @@ const Settings = ({navigation}) => {
                 const systemsData = JSON.parse(await FileSystem.readAsStringAsync(systemsURI));
 
                 if (systemsData)
-                    setStoredSystems(systemsData.system_URLS);
+                    setStoredSystems(systemsData['recent_systems']);
 
                 setUserSystemsRaw(systemsData);
 
@@ -73,11 +73,12 @@ const Settings = ({navigation}) => {
                 setIsSession(false);
                 break;
             case "system":
-                let systems = storedSystems.filter(function (url) { return url != data});
+                let systems = storedSystems.filter(function (system) { return system["URL"] != data});                        
                 setStoredSystems(systems);
-                let user_systems_whole = userSystemsRaw;
-                user_systems_whole.system_URLS = systems;
-                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));
+
+                let userSystemsWhole = userSystemsRaw;
+                userSystemsWhole["recent_systems"] = systems;
+                await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(userSystemsWhole));
 
                 //check if URL is associated with current session
                 const sessionURI = FileSystem.documentDirectory + "session.json";
@@ -110,8 +111,8 @@ const Settings = ({navigation}) => {
 
     const openSystem = async (data) => {
         
-        mie.practice.value = data.substring(8, data.indexOf('.'));
-        mie.URL.value = data;
+        mie.practice.value = data["handle"]
+        mie.URL.value = data["URL"];
 
         const sessionURI = FileSystem.documentDirectory + "session.json";
         let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
@@ -167,8 +168,8 @@ const Settings = ({navigation}) => {
                     </View>
                     { storedSystems.length > 0 ?
                         <View>
-                            { storedSystems?.map((URL, index) => (
-                                <DataCell openMethod={() => openSystem(storedSystems[index])} deleteMethod={deleteData} key={index} data={URL} type="system" />
+                            { storedSystems?.map((system, index) => (
+                                <DataCell openMethod={() => openSystem(storedSystems[index])} deleteMethod={deleteData} key={index} data={system["URL"]} type="system" />
                             ))} 
                         </View> :
                         <View style={styles.noData}>

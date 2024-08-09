@@ -78,7 +78,7 @@ const Tab = createBottomTabNavigator();
 
             await getOrientationData();
             const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json"];
-            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": true, "hasLaunched": false}, {}, {}, { "orientation": false }];
+            const initialStorageObject = [{ recent_systems: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": true, "hasLaunched": false}, {}, {}, { "orientation": false }];
           
 
             for (let i = 0; i < storageNames.length; i++){

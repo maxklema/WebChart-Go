@@ -86,8 +86,6 @@ const WebViewScreen = ({navigation}) => {
 
         switch(message) {
             case 'getContacts':
-                
-                console.log("get contacts!");
                 getContacts(patID);
                 break;
 
@@ -122,8 +120,6 @@ const WebViewScreen = ({navigation}) => {
                 //Store Cookie and Practice in JSON
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
-
-                console.log("SESSION DATA " + JSON.stringify(sessionData));
 
                 sessionData["canAccessSessionID"] = true;
                 sessionData["session_id"] = mie.Cookie.value;

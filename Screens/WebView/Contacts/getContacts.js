@@ -44,8 +44,6 @@ const getContacts = (patID) => {
                 const contactURI = FileSystem.documentDirectory + "contacts.json";
                 let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
 
-                console.log(JSON.stringify(contactData));
-
                 if (!contactData[mie.practice.value])
                     contactData[mie.practice.value] = {};
 
