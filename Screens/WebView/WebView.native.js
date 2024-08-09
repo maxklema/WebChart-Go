@@ -1,7 +1,7 @@
-import React, { useRef, useState, useContext, useEffect } from "react";
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Linking} from "react-native";
+import React, { useRef, useState, useContext } from "react";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity } from "react-native";
 import { WebView } from "react-native-webview";
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
@@ -63,13 +63,16 @@ const WebViewScreen = ({navigation}) => {
         setGoBack(navState.canGoBack);
         setGoForward(navState.canGoForward);
 
+        const patientChartRegex = /pat_id=\d+$/;
+        const documentRegex = /doc_id=\d+$/;
+
         //inject JS into the browser
-        if (url.endsWith('webchart.cgi?func=omniscope')) {
+        if (url.endsWith('webchart.cgi?func=omniscope') || url.endsWith('webchart.cgi?f=omniscope')) {
             webViewRef.current.injectJavaScript(homePageJSInject);
-        } else if (url.includes('pat_id=')) {
+        } else if (patientChartRegex.test(url)) {
             setPatID(parseInt(url.substring(url.indexOf('pat_id=')+7,url.length)))
             webViewRef.current.injectJavaScript(patientPageJSInject);
-        } else if (url.includes("f=chart&s=doc&v=detail&doc_id=")) {
+        } else if (documentRegex.test(url)) {
             setDocID(parseInt(url.substring(url.indexOf('doc_id=') + 7, url.length)))
             webViewRef.current.injectJavaScript(DocPageJSInject);
         }
@@ -79,8 +82,12 @@ const WebViewScreen = ({navigation}) => {
         
         const message = event.nativeEvent.data;
 
+        console.log("Message Received");
+
         switch(message) {
             case 'getContacts':
+                
+                console.log("get contacts!");
                 getContacts(patID);
                 break;
 
@@ -108,12 +115,15 @@ const WebViewScreen = ({navigation}) => {
                 break;
 
             default:
+
                 const data = JSON.parse(event.nativeEvent.data);
                 mie.Cookie.value = data.Cookie;
     
                 //Store Cookie and Practice in JSON
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+
+                console.log("SESSION DATA " + JSON.stringify(sessionData));
 
                 sessionData["canAccessSessionID"] = true;
                 sessionData["session_id"] = mie.Cookie.value;

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from "@react-navigation/native";
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
 import WebView from "react-native-webview";
 import { sessionCheck } from "../../Screens/WebView/WebView HTML Injection/sessionCheck";
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         color: '#fff',
         marginLeft: '3%',
-        width: '95%'
+        width: '92%'
     },
     loading_widget: {
         backgroundColor: 'rgb(240, 240, 240)',

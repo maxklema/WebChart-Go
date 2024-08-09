@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text } from "react-native-paper";
 import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from "@react-navigation/native";
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import { StyleSheet, View } from "react-native";
 
 import Container from "../../../Components/Container";

@@ -1,16 +1,18 @@
 import * as Contacts from 'expo-contacts';
 import formatContacts from './formatContacts';
 import { Alert } from 'react-native';
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import * as FileSystem from 'expo-file-system';
 
 const getPatientInfo = async (patID) => {
     const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone", "work_phone" ]
+
     let patInfo = await mie.retrieveRecord("patients", fields, { pat_id: patID})
     return patInfo;
 }
 
 const getContacts = (patID) => {
+
     (async () => {
         try {
             const { status } = await Contacts.requestPermissionsAsync();
@@ -42,12 +44,14 @@ const getContacts = (patID) => {
                 const contactURI = FileSystem.documentDirectory + "contacts.json";
                 let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
 
+                console.log(JSON.stringify(contactData));
+
                 if (!contactData[mie.practice.value])
                     contactData[mie.practice.value] = {};
 
                 if (!contactData[mie.practice.value][`${patID}`]){
 
-                    let patInfo = await getPatientInfo(patID);
+                    let patInfo = await getPatientInfo(patID);                    
                     const contactId = await formatContacts(patInfo, '');
 
                     let patientData = {

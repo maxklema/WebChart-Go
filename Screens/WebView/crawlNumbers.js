@@ -1,4 +1,4 @@
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 
 const getPhoneNumbers = async (patID) => {
 

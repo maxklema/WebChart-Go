@@ -13,7 +13,8 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.maxwell-klema.Webchart-Go"
+      "bundleIdentifier": "com.medical-informatics-engineering-inc.Webchart-Go",
+      "buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {

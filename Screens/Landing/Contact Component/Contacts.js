@@ -6,7 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as FileSystem from 'expo-file-system';
 import ContactCell from '../../../Components/Cells/contactCell';
 import ValidateSession from '../../../Components/Verification/validateSession';
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 
 const ContactsWidget = ({navigation, isSession, dataLocked}) => {
 

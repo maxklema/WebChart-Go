@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useEffect, useContext } from "react";
 import { StyleSheet, View, Text, Image } from "react-native";
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import { SettingsContext } from "../../Context/context";
 import { StackActions } from "@react-navigation/native";
 

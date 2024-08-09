@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View, SafeAreaView, Image, KeyboardAvoidingView, Platform, StatusBar } from 'react-native';
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import InputBox from '../../Components/Inputs/inputBox';
 import InputButton from '../../Components/Inputs/inputButton';
 import Warning from '../../Components/warning';

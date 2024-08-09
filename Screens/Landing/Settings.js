@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, Text, View, Switch } from 'react-native';
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import InputButton from '../../Components/Inputs/inputButton';
 import DataCell from '../../Components/Cells/dataCell';
 import { SettingsContext } from '../Context/context';
@@ -108,9 +108,10 @@ const Settings = ({navigation}) => {
         setIsSession(false);
     }
 
-    const openSystem = async(data) => {
+    const openSystem = async (data) => {
+        
         mie.practice.value = data.substring(8, data.indexOf('.'));
-        mie.URL.value = data.substring(0,data.indexOf(".com")+4);
+        mie.URL.value = data;
 
         const sessionURI = FileSystem.documentDirectory + "session.json";
         let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
@@ -167,7 +168,7 @@ const Settings = ({navigation}) => {
                     { storedSystems.length > 0 ?
                         <View>
                             { storedSystems?.map((URL, index) => (
-                                <DataCell openMethod={openSystem} deleteMethod={deleteData} key={index} data={URL} type="system" />
+                                <DataCell openMethod={() => openSystem(storedSystems[index])} deleteMethod={deleteData} key={index} data={URL} type="system" />
                             ))} 
                         </View> :
                         <View style={styles.noData}>

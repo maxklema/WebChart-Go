@@ -1,4 +1,4 @@
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import { Alert } from "react-native";
 import * as Open from 'expo-linking';
 import createInteraction from '../../Landing/Interactions/createInteraction';

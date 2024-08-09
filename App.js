@@ -6,7 +6,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SettingsProvider } from './Screens/Context/context';
 import * as FileSystem from 'expo-file-system';
-import mie from '@maxklema/mie-api-tools';
+import mie from '@maxklema/mie-api-tools-lite';
 import { View, ActivityIndicator, StyleSheet} from 'react-native';
 
 //Components / Screens
