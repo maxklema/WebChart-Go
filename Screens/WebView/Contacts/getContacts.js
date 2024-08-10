@@ -14,10 +14,11 @@ const getPatientInfo = async (patID) => {
 const getContacts = (patID) => {
 
     (async () => {
+
         try {
             const { status } = await Contacts.requestPermissionsAsync();
+            
             if (status === 'granted') {
-
                 const updateContact = async (contact_id) => {
                     let patInfo = await getPatientInfo(patID);
                     let ID = await formatContacts(patInfo, contact_id);
@@ -40,7 +41,6 @@ const getContacts = (patID) => {
                 }
 
                 //add to JSON storage.
-
                 const contactURI = FileSystem.documentDirectory + "contacts.json";
                 let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
 
@@ -83,13 +83,9 @@ const getContacts = (patID) => {
                     ]);
                 }
                 
-            } else {
-                alert('Cannot add Patient to Contacts');
             }
         } catch (e) {
-            const { canAskAgain } = await Contacts.requestPermissionsAsync();
-            if (canAskAgain)
-                Linking.openSettings();
+            Alert.alert("Error", "Cannot add patient to Contacts. Allow WebChart Go to access your contacts in your device's Settings.");
         }
     })();
 }

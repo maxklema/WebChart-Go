@@ -54,7 +54,6 @@ const LockScreen = ({ navigation }) => {
                     if (user_systems["recent_systems"].length > 0){
                         
                         const recentWC = user_systems["recent_systems"][0]["URL"];
-                        console.log(recentWC);
 
                         mie.practice.value = recentWC.substring(8, recentWC.indexOf('.'));
                         if (!recentWC.includes("/webchart.cgi")) {
@@ -70,7 +69,6 @@ const LockScreen = ({ navigation }) => {
                         // Pop lock screen off the stack
                         const popAction = StackActions.pop(1);
                         navigation.dispatch(popAction);
-
 
                     } else {
                         await navigateBack(true, sessionURI, sessionData, navigation);

@@ -79,10 +79,7 @@ const WebViewScreen = ({navigation}) => {
     }
 
     const onMessage = async (event) => {
-        
         const message = event.nativeEvent.data;
-
-        console.log("Message Received");
 
         switch(message) {
             case 'getContacts':

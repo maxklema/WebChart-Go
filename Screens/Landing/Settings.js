@@ -96,8 +96,8 @@ const Settings = ({navigation}) => {
 
     const deleteSystems = async() => {
         let user_systems_whole = userSystemsRaw;
-        user_systems_whole.system_URLS = []
-        setStoredSystems(user_systems_whole.system_URLS);
+        user_systems_whole["recent_systems"] = []
+        setStoredSystems(user_systems_whole["recent_systems"]);
         await FileSystem.writeAsStringAsync((FileSystem.documentDirectory + "systems.json"), JSON.stringify(user_systems_whole));        
         
         //update session data
