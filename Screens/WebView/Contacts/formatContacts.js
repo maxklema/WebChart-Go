@@ -12,6 +12,7 @@ const formatContacts = async (patInfo, contact_id) => {
         "middle_name": [Contacts.Fields.MiddleName],
         "title": [Contacts.Fields.Prefix],
         "suffix": [Contacts.Fields.Suffix],
+        "employer_name": [Contacts.Fields.Company],
         "email": [],
         "home_phone": [],
         "cell_phone": [],
@@ -80,10 +81,12 @@ const formatContacts = async (patInfo, contact_id) => {
             await Contacts.presentFormAsync(contact_id);
             return contact_id;
         } else {
+            contact['contactType'] = "person"
             const contactID = await Contacts.addContactAsync(contact);
             return contactID;
         }
     } else {
+        contact['contactType'] = "person"
         const contactId = await Contacts.addContactAsync(contact);
         return contactId;
     }

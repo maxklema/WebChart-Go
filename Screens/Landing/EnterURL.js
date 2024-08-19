@@ -7,6 +7,7 @@ import InputButton from '../../Components/Inputs/inputButton';
 import Warning from '../../Components/warning';
 import { Button } from 'react-native-paper';
 import * as FileSystem from 'expo-file-system';
+import { logError } from '../../Components/logError';
 
 import detectAppState from '../../Hooks/detectAppState';
 
@@ -103,7 +104,8 @@ const UrlScreen = ({ navigation }) => {
 
           }
         })
-        .catch(() => {
+        .catch((e) => {
+            logError(`ERROR: ${e}`)
             setWarningMessage('Invalid WebChart Handle', true);
             });
         onChangeText(text);

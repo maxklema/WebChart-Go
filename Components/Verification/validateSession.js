@@ -8,6 +8,7 @@ import { sessionCheck } from "../../Screens/WebView/WebView HTML Injection/sessi
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import InputButton from "../Inputs/inputButton";
 import DataLocked from "./DataLocked";
+import { logError } from "../logError";
 
 const ValidateSession = ({navigation, children, clearData, header, data, sessionValid, dataLocked}) => {
 
@@ -39,6 +40,7 @@ const ValidateSession = ({navigation, children, clearData, header, data, session
                         setIsSession(true);
                     
                 } catch (error) {
+                    logError(`ERROR: ${error}`)
                     console.error('Error handling interactions file:', error);
                 }
             };
