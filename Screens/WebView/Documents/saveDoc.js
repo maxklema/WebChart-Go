@@ -2,7 +2,7 @@ import mie from '@maxklema/mie-api-tools-lite';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Alert } from "react-native";
-
+import { logError } from '../../../Components/logError';
 
 const getEpochSeconds = () => {
     const epoch = new Date().getTime();
@@ -36,6 +36,7 @@ const saveDocument = async (docID) => {
             
 
         } catch (e) {
+            logError(`ERROR: ${e}`)
             Alert.alert("Save Failed", "There was an issue saving this file", [
                 {
                     text: 'Okay',

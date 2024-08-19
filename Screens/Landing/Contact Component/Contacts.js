@@ -7,6 +7,7 @@ import * as FileSystem from 'expo-file-system';
 import ContactCell from '../../../Components/Cells/contactCell';
 import ValidateSession from '../../../Components/Verification/validateSession';
 import mie from '@maxklema/mie-api-tools-lite';
+import { logError } from '../../../Components/logError';
 
 const ContactsWidget = ({navigation, isSession, dataLocked}) => {
 
@@ -46,7 +47,9 @@ const ContactsWidget = ({navigation, isSession, dataLocked}) => {
     const deleteContact = async (data) => {
         
         let contact_id = data['contact_id'];
-        try { await Contacts.removeContactAsync(contact_id); } catch {}
+        try { await Contacts.removeContactAsync(contact_id); } catch (e) {
+            logError(`ERROR: ${e}`)
+        }
 
         const contactURI = FileSystem.documentDirectory + "contacts.json";
         let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
@@ -68,7 +71,9 @@ const ContactsWidget = ({navigation, isSession, dataLocked}) => {
         let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
         
         for (let contact in contactData[mie.practice.value]){
-            try { await Contacts.removeContactAsync(contactData[mie.practice.value][contact]["contact_id"]); } catch {}
+            try { await Contacts.removeContactAsync(contactData[mie.practice.value][contact]["contact_id"]); } catch (e) {
+                logError(`ERROR: ${e}`)
+            }
             delete contactData[mie.practice.value][contact];
         }
                 

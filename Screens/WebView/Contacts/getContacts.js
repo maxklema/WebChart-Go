@@ -1,8 +1,9 @@
 import * as Contacts from 'expo-contacts';
 import formatContacts from './formatContacts';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import mie from '@maxklema/mie-api-tools-lite';
 import * as FileSystem from 'expo-file-system';
+import { logError } from '../../../Components/logError';
 
 const getPatientInfo = async (patID) => {
     const fields = ["address1", "address2", "address3", "birth_date", "employer_name", "email", "emergency_phone", "first_name", "last_name", "middle_name", "suffix", "title", "home_phone", "cell_phone", "work_phone" ]
@@ -14,10 +15,16 @@ const getPatientInfo = async (patID) => {
 const getContacts = (patID) => {
 
     (async () => {
-        try {
-            const { status } = await Contacts.requestPermissionsAsync();
-            if (status === 'granted') {
 
+        try {
+
+            let { status } = await Contacts.getPermissionsAsync();
+            if (status == "undetermined") {
+                await Contacts.requestPermissionsAsync();
+                status = await Contacts.getPermissionsAsync();
+            }
+
+            if (status === 'granted') {
                 const updateContact = async (contact_id) => {
                     let patInfo = await getPatientInfo(patID);
                     let ID = await formatContacts(patInfo, contact_id);
@@ -27,6 +34,7 @@ const getContacts = (patID) => {
                         'last_name': patInfo[0]['last_name'],
                         'title': patInfo[0]['title'],
                         'suffix': patInfo[0]['suffix'],
+                        "employer_name": patInfo[0]["employer_name"],
                         'wc_handle': mie.practice.value
                     }
 
@@ -40,11 +48,8 @@ const getContacts = (patID) => {
                 }
 
                 //add to JSON storage.
-
                 const contactURI = FileSystem.documentDirectory + "contacts.json";
                 let contactData = JSON.parse(await FileSystem.readAsStringAsync(contactURI));
-
-                console.log(JSON.stringify(contactData));
 
                 if (!contactData[mie.practice.value])
                     contactData[mie.practice.value] = {};
@@ -85,13 +90,15 @@ const getContacts = (patID) => {
                     ]);
                 }
                 
-            } else {
-                alert('Cannot add Patient to Contacts');
+            } else if (status === 'denied') {
+                Alert.alert("Access Denied", "Could not add patient to contacts because WebChart Go does not have permission to access your contacts.", [
+                    {text: "Ok", style: 'cancel'},
+                    {text: "Open Settings", onPress: () => Linking.openSettings() }
+                ]);
             }
         } catch (e) {
-            const { canAskAgain } = await Contacts.requestPermissionsAsync();
-            if (canAskAgain)
-                Linking.openSettings();
+            logError(`Error: ${e}`);
+            Alert.alert("Error", "Something went wrong while trying to add this patient to contacts.");
         }
     })();
 }

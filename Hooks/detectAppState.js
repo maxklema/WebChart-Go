@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 import { AppState } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from 'expo-file-system';
 
 const detectAppState = (navigation) => {
 
     const handleInActiveState = async () => {
+
+        //begin "inactive timer"
+        await AsyncStorage.setItem('lastBackgroundTime', Date.now().toString());
 
         //set canAccessSessionID to false;
         const sessionURI = FileSystem.documentDirectory + "session.json";
@@ -26,8 +30,17 @@ const detectAppState = (navigation) => {
                 if (currentAppState == "background"){
                     await handleInActiveState();
                 } else if (currentAppState === 'active' && previousAppState == 'background') {
-                    await navigation.navigate("Lock Screen");
+                    const lastBackgroundTime = await AsyncStorage.getItem('lastBackgroundTime');
 
+                    //if its been more than ten minutes, enforce local authorization
+                    if (lastBackgroundTime && (Date.now() - parseInt(lastBackgroundTime, 10)) >= 600000){
+                        await navigation.navigate("Lock Screen");
+                    } else {
+                        const sessionURI = FileSystem.documentDirectory + "session.json";
+                        const sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
+                        sessionData["canAccessSessionID"] = true;
+                        await FileSystem.writeAsStringAsync(sessionURI, JSON.stringify(sessionData));
+                    }
                 }
                 previousAppState = currentAppState;
             };

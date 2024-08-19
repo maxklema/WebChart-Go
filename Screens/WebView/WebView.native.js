@@ -79,15 +79,10 @@ const WebViewScreen = ({navigation}) => {
     }
 
     const onMessage = async (event) => {
-        
         const message = event.nativeEvent.data;
-
-        console.log("Message Received");
 
         switch(message) {
             case 'getContacts':
-                
-                console.log("get contacts!");
                 getContacts(patID);
                 break;
 
@@ -122,8 +117,6 @@ const WebViewScreen = ({navigation}) => {
                 //Store Cookie and Practice in JSON
                 const sessionURI = FileSystem.documentDirectory + "session.json";
                 let sessionData = JSON.parse(await FileSystem.readAsStringAsync(sessionURI));
-
-                console.log("SESSION DATA " + JSON.stringify(sessionData));
 
                 sessionData["canAccessSessionID"] = true;
                 sessionData["session_id"] = mie.Cookie.value;

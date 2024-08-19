@@ -7,7 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SettingsProvider } from './Screens/Context/context';
 import * as FileSystem from 'expo-file-system';
 import mie from '@maxklema/mie-api-tools-lite';
-import { View, ActivityIndicator, StyleSheet} from 'react-native';
+import { View, ActivityIndicator, StyleSheet, TouchableOpacity, Text} from 'react-native';
 
 //Components / Screens
 import UrlScreen from './Screens/Landing/EnterURL';
@@ -16,6 +16,7 @@ import Settings from './Screens/Landing/Settings';
 import interactionsPage from './Screens/Landing/Interactions/interactions-page';
 import Orientation from './Screens/Landing/orientation.js';
 import LockScreen from './Screens/Landing/Local Verification/lockScreen';
+import { LogScreen } from './Components/logError.js';
 
 // Create the Stack Navigator
 const Stack = createStackNavigator();
@@ -47,14 +48,35 @@ const Tab = createBottomTabNavigator();
             <Tab.Screen
                 name="Enter URL"
                 component={UrlScreen}
+                options={({navigation}) => ({
+                  headerRight: () => (
+                    <TouchableOpacity onPress={() => navigation.navigate("Dev Logs")}>
+                      <Text style={{ color: '#000', marginRight: 10 }}>Dev Logs</Text>
+                    </TouchableOpacity>
+                  ),
+                })}
             />
             <Tab.Screen
                 name="Interactions"
                 component={interactionsPage}
+                options={({navigation}) => ({
+                  headerRight: () => (
+                    <TouchableOpacity onPress={() => navigation.navigate("Dev Logs")}>
+                      <Text style={{ color: '#000', marginRight: 10 }}>Dev Logs</Text>
+                    </TouchableOpacity>
+                  ),
+                })}
             />
             <Tab.Screen
                 name="Settings"
                 component={Settings}
+                options={({navigation}) => ({
+                  headerRight: () => (
+                    <TouchableOpacity onPress={() => navigation.navigate("Dev Logs")}>
+                      <Text style={{ color: '#000', marginRight: 10 }}>Dev Logs</Text>
+                    </TouchableOpacity>
+                  ),
+                })}
             />
         </Tab.Navigator>
     );
@@ -70,15 +92,15 @@ const Tab = createBottomTabNavigator();
       useEffect(() => {
         (async () => {
 
-            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "session.json");
-            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "interactions.json");
-            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "systems.json");
-            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "contacts.json");
-            // await FileSystem.deleteAsync(FileSystem.documentDirectory + "orientation.json");
+            await FileSystem.deleteAsync(FileSystem.documentDirectory + "session.json");
+            await FileSystem.deleteAsync(FileSystem.documentDirectory + "interactions.json");
+            await FileSystem.deleteAsync(FileSystem.documentDirectory + "systems.json");
+            await FileSystem.deleteAsync(FileSystem.documentDirectory + "contacts.json");
+            await FileSystem.deleteAsync(FileSystem.documentDirectory + "orientation.json");
 
             await getOrientationData();
-            const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json"];
-            const initialStorageObject = [{ name: "WC_Systems", system_URLS: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": true, "hasLaunched": false}, {}, {}, { "orientation": false }];
+            const storageNames = ["systems.json", "session.json", "interactions.json", "contacts.json", "orientation.json", "log.json"];
+            const initialStorageObject = [{ recent_systems: [] }, {"session_id": "no session", "wc_handle": "No Handle", "wc_URL": "", "canAccessSessionID": true, "hasLaunched": false}, {}, {}, { "orientation": false }, {}];
           
 
             for (let i = 0; i < storageNames.length; i++){
@@ -129,10 +151,20 @@ const Tab = createBottomTabNavigator();
                     <Stack.Screen name="Welcome" component={Orientation} options={{ headerShown: false}}/> 
                   )}
                   <Stack.Screen name="Back" component={NavBar} options={{ headerShown: false}}/>
-                  <Stack.Screen name='WebChart' component={WebViewScreen} options={({navigation}) => ({
-                    title: mie.practice.value,
-                  })}/>
+                  <Stack.Screen name='WebChart' component={WebViewScreen} options={({ navigation }) => ({
+                  title: mie.practice.value,
+                  headerRight: () => (
+                    <TouchableOpacity onPress={() => navigation.navigate("Dev Logs")}>
+                      <Text style={{ color: '#000', marginRight: 10 }}>Dev Logs</Text>
+                    </TouchableOpacity>
+                  ),
+                })}/>
                   <Stack.Screen name="Lock Screen" component={LockScreen} options={{ headerShown: false }}/>
+                  <Stack.Screen name="Dev Logs" component={LogScreen}
+                    options={{
+                      presentation: 'modal'
+                    }}
+                  />
               </Stack.Navigator>
               </NavigationContainer>
             </PaperProvider>
